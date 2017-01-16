@@ -11,7 +11,7 @@ class Author(models.Model):
 class Story(models.Model):
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
-    contents = models.TextField
+    contents = models.TextField(default='')
 
     def __str__(self):
         return self.title
