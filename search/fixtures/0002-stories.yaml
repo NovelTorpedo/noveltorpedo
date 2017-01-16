@@ -1,0 +1,107 @@
+- model: search.story
+  pk: 1
+  fields:
+    author: 1
+    title: "Lost in Space"
+    contents: >
+      With drooping heads and tremulous tails, they mashed their way
+      through the thick mud, floundering and stumbling between whiles,
+      as if they were falling to pieces at the larger joints.  As often
+      as the driver rested them and brought them to a stand, with a
+      wary "Wo-ho! so-ho-then!" the near leader violently shook his
+      head and everything upon it--like an unusually emphatic horse,
+      denying that the coach could be got up the hill.  Whenever the
+      leader made this rattle, the passenger started, as a nervous
+      passenger might, and was disturbed in mind.
+
+      There was a steaming mist in all the hollows, and it had roamed
+      in its forlornness up the hill, like an evil spirit, seeking rest
+      and finding none.  A clammy and intensely cold mist, it made its
+      slow way through the air in ripples that visibly followed and
+      overspread one another, as the waves of an unwholesome sea might
+      do.  It was dense enough to shut out everything from the light of
+      the coach-lamps but these its own workings, and a few yards of
+      road; and the reek of the labouring horses steamed into it, as if
+      they had made it all.
+
+      Two other passengers, besides the one, were plodding up the hill
+      by the side of the mail.  All three were wrapped to the cheekbones
+      and over the ears, and wore jack-boots.  Not one of the three
+      could have said, from anything he saw, what either of the other
+      two was like; and each was hidden under almost as many wrappers
+      from the eyes of the mind, as from the eyes of the body, of his
+      two companions.  In those days, travellers were very shy of being
+      confidential on a short notice, for anybody on the road might be
+      a robber or in league with robbers.  As to the latter, when every
+      posting-house and ale-house could produce somebody in "the Captain's"
+      pay, ranging from the landlord to the lowest stable non-descript,
+      it was the likeliest thing upon the cards.  So the guard of the
+      Dover mail thought to himself, that Friday night in November, one
+      thousand seven hundred and seventy-five, lumbering up Shooter's
+      Hill, as he stood on his own particular perch behind the mail,
+      beating his feet, and keeping an eye and a hand on the arm-chest
+      before him, where a loaded blunderbuss lay at the top of six or
+      eight loaded horse-pistols, deposited on a substratum of cutlass.
+
+      The Dover mail was in its usual genial position that the guard
+      suspected the passengers, the passengers suspected one another
+      and the guard, they all suspected everybody else, and the coachman
+      was sure of nothing but the horses; as to which cattle he could
+      with a clear conscience have taken his oath on the two Testaments
+      that they were not fit for the journey.
+
+      "Wo-ho!" said the coachman.  "So, then!  One more pull and you're
+      at the top and be damned to you, for I have had trouble enough to
+      get you to it!--Joe!"
+
+- model: search.story
+  pk: 2
+  fields:
+    author: 1
+    title: "Western"
+    contents: >
+      The passenger booked by this history, was on the coach-step,
+      getting in; the two other passengers were close behind him, and
+      about to follow.  He remained on the step, half in the coach and
+      half out of; they remained in the road below him.  They all
+      looked from the coachman to the guard, and from the guard to the
+      coachman, and listened.  The coachman looked back and the guard
+      looked back, and even the emphatic leader pricked up his ears and
+      looked back, without contradicting.
+
+      The stillness consequent on the cessation of the rumbling and
+      labouring of the coach, added to the stillness of the night, made
+      it very quiet indeed.  The panting of the horses communicated a
+      tremulous motion to the coach, as if it were in a state of
+      agitation.  The hearts of the passengers beat loud enough perhaps
+      to be heard; but at any rate, the quiet pause was audibly
+      expressive of people out of breath, and holding the breath, and
+      having the pulses quickened by expectation.
+
+      The sound of a horse at a gallop came fast and furiously up the hill.
+
+      "So-ho!" the guard sang out, as loud as he could roar.  "Yo there!
+      Stand!  I shall fire!"
+
+      The pace was suddenly checked, and, with much splashing and floundering,
+      a man's voice called from the mist, "Is that the Dover mail?"
+
+      "Never you mind what it is!" the guard retorted.  "What are you?"
+
+      "_Is_ that the Dover mail?"
+
+      "Why do you want to know?"
+
+      "I want a passenger, if it is."
+
+      "What passenger?"
+
+      "Mr. Jarvis Lorry."
+
+      Our booked passenger showed in a moment that it was his name.
+      The guard, the coachman, and the two other passengers eyed him
+      distrustfully.
+
+      "Keep where you are," the guard called to the voice in the mist,
+      "because, if I should make a mistake, it could never be set right
+      in your lifetime.  Gentleman of the name of Lorry answer straight."
