@@ -1,0 +1,13 @@
+{% extends 'search/template.html' %}
+
+{% block content %}
+    <h1>NovelTorpedo Search</h1>
+    <form action="{% url 'search:search' %}" method="POST">
+        {% csrf_token %}
+        <label>
+            Search for Literature:
+            <input type="text" name="search" id="search" />
+        </label>
+        <input type="submit" value="Search!" />
+    </form>
+{% endblock %}
