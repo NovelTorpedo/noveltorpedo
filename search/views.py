@@ -6,4 +6,4 @@ def index(request):
 
 
 def search(request):
-    return HttpResponse(request.POST['search'])
+    return HttpResponse(request.GET['search'])
