@@ -1,5 +1,5 @@
 from haystack import indexes
-from noveltorpedo.models import Story
+from noveltorpedo.models import Story as StoryModel
 
 
 class Story(indexes.SearchIndex, indexes.Indexable):
@@ -7,4 +7,4 @@ class Story(indexes.SearchIndex, indexes.Indexable):
     title = indexes.CharField(model_attr='title')
 
     def get_model(self):
-        return Story
+        return StoryModel
