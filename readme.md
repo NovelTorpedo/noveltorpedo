@@ -16,5 +16,5 @@ Install and change cluster name to "noveltorpedo"
 Database setup, with fresh empty database:
 ```bash
 python3 manage.py migrate
-python3 manage.py loaddata search/fixtures/*.yaml
+python3 manage.py loaddata noveltorpedo/fixtures/*.yaml
 ```
