@@ -3,7 +3,7 @@ from django.http import HttpResponse
 
 
 def home(request):
-    return render(request, 'search/pages/home.html')
+    return render(request, 'noveltorpedo/pages/home.html')
 
 
 def search(request):
