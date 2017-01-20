@@ -1,9 +1,9 @@
-- model: search.author
+- model: noveltorpedo.author
   pk: 1
   fields:
     name: "Person Man"
 
-- model: search.author
+- model: noveltorpedo.author
   pk: 2
   fields:
     name: "Person Woman"

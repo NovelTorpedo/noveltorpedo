@@ -1,4 +1,4 @@
-- model: search.story
+- model: noveltorpedo.story
   pk: 1
   fields:
     author: 1
@@ -54,7 +54,7 @@
       at the top and be damned to you, for I have had trouble enough to
       get you to it!--Joe!"
 
-- model: search.story
+- model: noveltorpedo.story
   pk: 2
   fields:
     author: 1
