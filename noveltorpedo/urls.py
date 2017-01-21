@@ -4,5 +4,5 @@ from . import views
 app_name = 'noveltorpedo'
 
 urlpatterns = [
-    url(r'^', include('haystack.urls')),
+    url(r'^$', views.SearchView(), name='haystack_search'),
 ]

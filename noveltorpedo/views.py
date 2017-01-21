@@ -9,4 +9,4 @@ class SearchView(HaystackSearchView):
         self.form_class = SearchForm
         self.results_per_page = 16
 
-        super(SearchView).__init__(template, load_all, self.form_class, searchqueryset, self.results_per_page)
+        super(self.__class__, self).__init__(template, load_all, self.form_class, searchqueryset, self.results_per_page)
