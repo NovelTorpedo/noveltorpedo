@@ -1,5 +1,7 @@
 {% extends 'noveltorpedo/template.html' %}
 
+{% load highlight %}
+
 {% block content %}
     <div class="row">
         <div class="col-md-12">
@@ -17,7 +19,12 @@
 
                 {% for result in page.object_list %}
                     <p>
-                        <a href="{{ result.object.get_absolute_url }}">{{ result.object.title }}</a>
+                        <a href="{{ result.object.get_absolute_url }}">
+                            {{ result.object.title }}
+                        </a>
+                        <div>
+                            {% highlight result.object.contents with query %}
+                        </div>
                     </p>
                 {% empty %}
                     <p>No results found.</p>
