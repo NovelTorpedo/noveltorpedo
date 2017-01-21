@@ -3,14 +3,14 @@
 Install dependencies:
 ```bash
 sudo apt update
-sudo apt install python3-django
-sudo apt install python3-django-haystack
-sudo apt install python3-elasticsearch
-sudo apt install python3-yaml
-sudo apt install python3-psycopg2 # PostgreSQL adapter for Python
+sudo apt install python3-django             # 1.8.7-1ubuntu5.4
+sudo apt install python3-elasticsearch      # 1.6.0-1
+sudo apt install python3-yaml               # 3.11-3build1
+sudo apt install python3-psycopg2           # 2.6.1-1build2
 
-Download elasticsearch from:  https://www.elastic.co/downloads/elasticsearch
-Install and change cluster name to "noveltorpedo"
+elasticsearch 2.4.4:  https://www.elastic.co/downloads/past-releases/elasticsearch-2-4-4
+django-haystack 2.6.0:  https://django-haystack.readthedocs.io/en/v2.6.0/index.html
+postgresql 9.5+173
 ```
 
 Database setup, with fresh empty database:
