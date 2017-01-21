@@ -17,4 +17,5 @@ Database setup, with fresh empty database:
 ```bash
 python3 manage.py migrate
 python3 manage.py loaddata noveltorpedo/fixtures/*.yaml
+python3 manage.py rebuild_index
 ```
