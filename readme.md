@@ -13,6 +13,13 @@ django-haystack 2.6.0:  https://django-haystack.readthedocs.io/en/v2.6.0/index.h
 postgresql 9.5+173
 ```
 
+I am currently installing Haystack with pip, since the apt package `python3-django-haystack` is an older version:
+```bash
+sudo pip install django-haystack 
+```
+
+## Database / Search Index Migrations and Seeding
+
 Database setup, with fresh empty database:
 ```bash
 python3 manage.py migrate
