@@ -25,7 +25,7 @@ SECRET_KEY = '&m+-8z0js-5kz9-9-u%jdzx+rwvl!$+1q+ube#@ua9x+40ixr8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["cs470-litrocket.cs.pdx.edu"]
+ALLOWED_HOSTS = []
 
 
 # Application definition
