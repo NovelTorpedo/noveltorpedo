@@ -16,18 +16,24 @@
                 {{ form.as_table }}
                 <button type="submit" class="btn btn-default">Search!</button>
             </form>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-8 col-sm-offset-2">
             {% if query %}
                 <h3>Results</h3>
 
                 {% for result in page.object_list %}
-                    <p>
-                        <a href="{{ result.object.get_absolute_url }}">
-                            {{ result.object.title }}
-                        </a>
-                        <div>
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            <a href="{{ result.object.get_absolute_url }}">
+                                {{ result.object.title }}
+                            </a>
+                        </div>
+                        <div class="panel-body">
                             {% highlight result.object.contents with query %}
                         </div>
-                    </p>
+                    </div>
                 {% empty %}
                     <p>No results found.</p>
                 {% endfor %}
