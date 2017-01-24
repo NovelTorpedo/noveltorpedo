@@ -21,3 +21,6 @@ class StoryAttribute(models.Model):
     story = models.ForeignKey(Story, on_delete=models.CASCADE)
     key = models.CharField(max_length=255)
     value = models.CharField(max_length=511)
+
+    def __str__(self):
+        return self.story.__str__() + ' - ' + self.key
