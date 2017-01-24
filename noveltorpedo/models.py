@@ -9,7 +9,7 @@ class Author(models.Model):
 
 
 class Story(models.Model):
-    author = models.ForeignKey(Author, on_delete=models.CASCADE)
+    authors = models.ManyToManyField(Author)
     title = models.CharField(max_length=255)
     contents = models.TextField(default='')
 
