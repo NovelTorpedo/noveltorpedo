@@ -1,6 +1,7 @@
 from django.contrib import admin
 
-from .models import Author, Story
+from noveltorpedo.models import *
 
 admin.site.register(Author)
 admin.site.register(Story)
+admin.site.register(StoryAttribute)
