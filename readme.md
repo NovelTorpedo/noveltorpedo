@@ -15,6 +15,7 @@ postgresql 9.5+173
 
 I am currently installing Haystack with pip, since the apt package `python3-django-haystack` is an older version:
 ```bash
+sudo apt install python-pip
 sudo pip install django-haystack 
 ```
 
