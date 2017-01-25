@@ -1,6 +1,14 @@
 language: python
+services:
+  - postgresql
+  - elasticsearch
 python:
   - "3.5"
 install:
-  - pip install django
-  - pip install 
+  - pip install -q django
+  - pip install -q elasticsearch
+  - pip install -q yaml
+  - pip install -q psycopg2
+before_script:
+  - sleep 10
+  - psql -c 'create database noveltorpedo;' -U postgres
