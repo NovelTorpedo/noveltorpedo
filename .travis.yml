@@ -7,10 +7,14 @@ python:
 before_install:
   - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.4/elasticsearch-2.4.4.deb && sudo dpkg -i --force-confnew elasticsearch-2.4.4.deb && sudo service elasticsearch restart
 install:
-  - pip install -q django
   - pip install -q elasticsearch
-  - pip install -q yaml
   - pip install -q psycopg2
+  - pip install -q yaml
+  - pip install -q django
+  - pip install -q django-haystack
 before_script:
   - sleep 10
-  - psql -c 'create database noveltorpedo;' -U postgres
+  - psql -c 'CREATE DATABASE noveltorpedo;' -U postgres
+  - python website/manage.py migrate
+  - python website/manage.py loaddata website/noveltorpedo/fixtures/*.yaml
+  - python website/manage.py update_index
