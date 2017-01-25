@@ -27,3 +27,7 @@ python3 manage.py migrate
 python3 manage.py loaddata noveltorpedo/fixtures/*.yaml
 python3 manage.py rebuild_index
 ```
+
+## TODO
+
+Check out [Model Mommy](https://github.com/vandersonmota/model_mommy) for better fixtures.
