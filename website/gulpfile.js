@@ -15,11 +15,16 @@ gulp.task('js', function() {
 });
 
 // Compile all of our Sass.
-gulp.task('scss', function() {
-    return gulp.src('resources/scss/main.scss')
+gulp.task('sass', function() {
+    return gulp.src('resources/sass/main.scss')
         .pipe(sass().on('error', sass.logError))
         .pipe(rename('app.css'))
         .pipe(gulp.dest('static/'));
 });
 
-gulp.task('default', ['js', 'scss']);
+gulp.task('default', ['js', 'sass']);
+
+gulp.task('watch', function() {
+    gulp.watch('resources/js/**/*.js', ['js']);
+    gulp.watch('resources/sass/**/*.scss', ['sass']);
+});
