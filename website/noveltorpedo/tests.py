@@ -10,3 +10,8 @@ class SearchTests(TestCase):
         response = client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'NovelTorpedo Search')
+
+class DBTests(TestCase):
+
+    def test_that_inserts_and_retreieves(self):
+        True

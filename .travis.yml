@@ -18,3 +18,5 @@ before_script:
   - python website/manage.py migrate
   - python website/manage.py loaddata website/noveltorpedo/fixtures/*.yaml
   - python website/manage.py update_index
+script:
+  - python website/noveltorpedo/tests.py
