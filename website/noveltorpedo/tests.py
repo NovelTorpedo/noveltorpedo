@@ -30,8 +30,27 @@ class ModelTests(TestCase):
         story.save()
         story.authors.add(author)
 
-        # Grab the story.
+        # Grab the story by title.
         story = Story.objects.filter(title=story_title).first()
+        self.assertEqual(story.title, story_title)
+        self.assertEqual(story.contents, story_contents)
+
+        # Grab the author from the story.
+        author = story.authors.first()
+        self.assertEqual(author.name, author_name)
+
+        # Grab the story by contents.
+        story = Story.objects.filter(contents=story_contents).first()
+        self.assertEqual(story.title, story_title)
+        self.assertEqual(story.contents, story_contents)
+
+        # Grab the author from the story.
+        author = story.authors.first()
+        self.assertEqual(author.name, author_name)
+
+        # Grab the story by author.
+        author = Author.objects.filter(name = author_name).first()
+        story = Story.objects.filter(authorsgit = author).first()
         self.assertEqual(story.title, story_title)
         self.assertEqual(story.contents, story_contents)
 
