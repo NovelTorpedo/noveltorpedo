@@ -12,17 +12,29 @@ class SearchTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'NovelTorpedo Search')
 
-class DBTests(TestCase):
 
-    def test_that_inserts_and_retreieves(self):
-        test = Story
-        test_author = Author
-        test_author.name = "test name"
-        test.authors = test_author
-        test.title = "test title"
-        test.contents = "test contents"
+class ModelTests(TestCase):
 
-        test.save()
+    def test_that_models_insert_and_retreieve(self):
+        author_name = "test name"
+        story_title = "The Big Lebowski"
+        story_contents = "A long time ago in a galaxy far far away"
 
-        all_entries = Story.objects.all()
-        print(all_entries)
+        author = Author()
+        author.name = author_name
+        author.save()
+
+        story = Story()
+        story.title = story_title
+        story.contents = story_contents
+        story.save()
+        story.authors.add(author)
+
+        # Grab the story.
+        story = Story.objects.filter(title=story_title).first()
+        self.assertEqual(story.title, story_title)
+        self.assertEqual(story.contents, story_contents)
+
+        # Grab the author from the story.
+        author = story.authors.first()
+        self.assertEqual(author.name, author_name)
