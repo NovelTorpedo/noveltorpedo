@@ -34,7 +34,7 @@ DOWNLOAD_DELAY = 3
 
 # Disable cookies (enabled by default)
 COOKIES_ENABLED = False
-USER_AGENT = "Capstone Project Practice <linux.cs.pdx.edu>"
+USER_AGENT = "NovelTorpedo (https://github.com/NovelTorpedo/noveltorpedo/"
 
 # Disable Telnet Console (enabled by default)
 #TELNETCONSOLE_ENABLED = False
