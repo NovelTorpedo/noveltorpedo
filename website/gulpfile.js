@@ -5,7 +5,7 @@ var rename = require('gulp-rename');
 
 // Compile all our JavaScript.
 gulp.task('js', function() {
-    return gulp.src('resources/js/main.js')
+    return gulp.src('assets/js/main.js')
         .pipe(webpack({
             output: {
                 filename: 'app.js'
@@ -16,7 +16,7 @@ gulp.task('js', function() {
 
 // Compile all of our Sass.
 gulp.task('sass', function() {
-    return gulp.src('resources/sass/main.scss')
+    return gulp.src('assets/sass/main.scss')
         .pipe(sass().on('error', sass.logError))
         .pipe(rename('app.css'))
         .pipe(gulp.dest('static/'));
@@ -25,6 +25,6 @@ gulp.task('sass', function() {
 gulp.task('default', ['js', 'sass']);
 
 gulp.task('watch', function() {
-    gulp.watch('resources/js/**/*.js', ['js']);
-    gulp.watch('resources/sass/**/*.scss', ['sass']);
+    gulp.watch('assets/js/**/*.js', ['js']);
+    gulp.watch('assets/sass/**/*.scss', ['sass']);
 });
