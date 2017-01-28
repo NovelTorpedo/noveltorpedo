@@ -3,6 +3,7 @@ import scrapy
 
 class StorySpider(scrapy.Spider):
     name = "stories_test"
+
     def start_requests(self):
         urls = [
             "https://forums.spacebattles.com/forums/creative-writing-archive.40"
@@ -11,8 +12,6 @@ class StorySpider(scrapy.Spider):
         
         for url in urls:
             yield scrapy.Request(url=url, callback=self.loop_pages)
-
-
 
     def loop_pages(self, response):
             
@@ -44,9 +43,6 @@ class StorySpider(scrapy.Spider):
             yield scrapy.Request(next_page_link, callback=self.loop_pages)
         """
 
-
-
-
     def get_thread_urls(self, response):
 
         """ Scan the threads on a page
@@ -62,9 +58,7 @@ class StorySpider(scrapy.Spider):
         urls = []
 
         li_tags = response.xpath("//li[@class='discussionListItem visible  ']")
-        
 
-        
         for thread_tag in li_tags:
             author = thread_tag.xpath('@data-author').extract()
             a_node = thread_tag.xpath("div/div/h3/a")
@@ -79,9 +73,7 @@ class StorySpider(scrapy.Spider):
                 urls.append(thread_link)
                 #yield scrapy.Request(thread_link, callback=self.scan_thread)
 
-        
         return urls
-
 
     def scan_thread(self, response):
 
@@ -100,9 +92,7 @@ class StorySpider(scrapy.Spider):
             div_threadmark_url = div_threadmarks.xpath("div/a/@href").extract_first()
             threadmark_url = response.urljoin(div_threadmark_url)
             yield scrapy.Request(threadmark_url, callback=self.process_threadmarks)
-            
 
-    
     def process_threadmarks(self, response):
         
         """ extract all of the thread marks for this thread.
@@ -115,16 +105,3 @@ class StorySpider(scrapy.Spider):
 
         """
         print("\nscraping {0}\n".format(response.url))
-
-
-
-
-
-
-
-
-
-
-
-
-

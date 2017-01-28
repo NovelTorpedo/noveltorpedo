@@ -4,7 +4,6 @@ import scrapy
 class StorySpider(scrapy.Spider):
     name = "stories"
 
-
     thread_queue = []
 
     def start_requests(self):
@@ -12,11 +11,8 @@ class StorySpider(scrapy.Spider):
             "https://forums.spacebattles.com/forums/creative-writing.18"
         ]
 
-        
         for url in urls:
             yield scrapy.Request(url=url, callback=self.loop_pages)
-
-
 
     def loop_pages(self, response):
             
@@ -35,12 +31,10 @@ class StorySpider(scrapy.Spider):
         next_page_link = response.xpath("//a[@class='text' and contains(., 'Next')]")
         next_page_link = next_page_link.xpath('@href').extract_first()
 
-        
         urls = self.get_thread_urls(response)
     
         for url in urls:
             thread_queue.insert(0, url)
-        
 
         yield scrapy.Request(url, callback=self.scan_thread)
         
@@ -52,9 +46,6 @@ class StorySpider(scrapy.Spider):
             next_page_link = response.urljoin(next_page_link)
             yield scrapy.Request(next_page_link, callback=self.loop_pages)
         """
-
-
-
 
     def get_thread_urls(self, response):
 
@@ -71,9 +62,7 @@ class StorySpider(scrapy.Spider):
         urls = []
 
         li_tags = response.xpath("//li[@class='discussionListItem visible  ']")
-        
 
-        
         for thread_tag in li_tags:
             author = thread_tag.xpath('@data-author').extract()
             a_node = thread_tag.xpath("div/div/h3/a")
@@ -88,9 +77,7 @@ class StorySpider(scrapy.Spider):
                 urls.append(thread_link)
                 #yield scrapy.Request(thread_link, callback=self.scan_thread)
 
-        
         return urls
-
 
     def scan_thread(self, response):
 
@@ -102,22 +89,3 @@ class StorySpider(scrapy.Spider):
         """
 
         print("\nscraping thread {0}\n".format(response.url))
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

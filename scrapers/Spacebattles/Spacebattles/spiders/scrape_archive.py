@@ -10,6 +10,8 @@ activity suggests it is updated several times a day.
 The format of the archive threads disallow comments, so it is possible to just 
 scrape every post.
 """
+
+
 class StorySpider(scrapy.Spider):
     name = "storyarchive"
 
@@ -17,12 +19,9 @@ class StorySpider(scrapy.Spider):
         urls = [
             "https://forums.spacebattles.com/forums/creative-writing-archive.40/"
         ]
-
         
         for url in urls:
             yield scrapy.Request(url=url, callback=self.parse)
-
-
 
     def parse(self, response):
                 
@@ -42,8 +41,6 @@ class StorySpider(scrapy.Spider):
             yield scrapy.Request(next_page_link, callback=self.parse)
 
         #self.parse_page(response)
-
-
 
     def parse_page(self, response):
         print("scraping {0}".format(response.url))
