@@ -2,10 +2,14 @@ import scrapy
 
 
 class StorySpider(scrapy.Spider):
-    name = "stories_test"
+    name = "stories"
+
+
+    thread_queue = []
+
     def start_requests(self):
         urls = [
-            "https://forums.spacebattles.com/forums/creative-writing-archive.40"
+            "https://forums.spacebattles.com/forums/creative-writing.18"
         ]
 
         
@@ -22,7 +26,9 @@ class StorySpider(scrapy.Spider):
         response -- the response object used to navigate the page
 
         """
-        
+        #insert while loop here later to scan THROUGH the threads
+
+        # ------
         current_page = response.xpath("//a[@class='currentPage ']/text()")
         print("current page: {0}".format(current_page.extract_first()))
 
@@ -33,9 +39,12 @@ class StorySpider(scrapy.Spider):
         urls = self.get_thread_urls(response)
     
         for url in urls:
-            yield scrapy.Request(url, callback=self.scan_thread)
+            thread_queue.insert(0, url)
         
 
+        yield scrapy.Request(url, callback=self.scan_thread)
+        
+        #TODO: ADD CHECK HERE to only proceed when the thread_queue is empty!!!
         """
         if next_page_link is not None:
 
@@ -92,29 +101,13 @@ class StorySpider(scrapy.Spider):
 
         """
 
-        print("\nscraping {0}\n".format(response.url))
+        print("\nscraping thread {0}\n".format(response.url))
 
-        div_threadmarks = response.xpath("//div[@class='Menu threadmarksMenu']")
-
-        if len(div_threadmarks) > 0:
-            div_threadmark_url = div_threadmarks.xpath("div/a/@href").extract_first()
-            threadmark_url = response.urljoin(div_threadmark_url)
-            yield scrapy.Request(threadmark_url, callback=self.process_threadmarks)
-            
-
-    
-    def process_threadmarks(self, response):
         
-        """ extract all of the thread marks for this thread.
 
-        Keyword Arguments:
-            response -- the response object used to navigate the page
 
-        Return Value:
-            a list of threadmark urls for this thread
 
-        """
-        print("\nscraping {0}\n".format(response.url))
+
 
 
 

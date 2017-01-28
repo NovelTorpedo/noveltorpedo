@@ -15,9 +15,6 @@ SPIDER_MODULES = ['Spacebattles.spiders']
 NEWSPIDER_MODULE = 'Spacebattles.spiders'
 
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'Spacebattles (+http://www.yourdomain.com)'
-
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = True
 
