@@ -32,7 +32,7 @@ class AuthorAttribute(models.Model):
     value = models.CharField(max_length=511)
 
     class Meta:
-        db_table = 'author_attributes'
+        db_table = 'noveltorpedo_author_attributes'
 
     def __str__(self):
         return self.story.__str__() + ' - ' + self.key
@@ -59,7 +59,7 @@ class StoryAttribute(models.Model):
     value = models.CharField(max_length=511)
 
     class Meta:
-        db_table = 'story_attributes'
+        db_table = 'noveltorpedo_story_attributes'
 
     def __str__(self):
         return self.story.__str__() + ' - ' + self.key
@@ -75,7 +75,7 @@ class StoryHost(models.Model):
     last_scraped = models.DateTimeField()
 
     class Meta:
-        db_table = 'story_hosts'
+        db_table = 'noveltorpedo_story_hosts'
 
 
 class StorySegment(models.Model):
@@ -88,4 +88,4 @@ class StorySegment(models.Model):
     published = models.DateTimeField()
 
     class Meta:
-        db_table = 'story_segments'
+        db_table = 'noveltorpedo_story_segments'
