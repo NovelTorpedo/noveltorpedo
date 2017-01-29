@@ -1,6 +1,8 @@
 from django.core.management.base import BaseCommand
 from django.db import connection
 from noveltorpedo.models import *
+from datetime import datetime
+import pytz
 import random
 
 # Truncate the tables.
@@ -21,6 +23,17 @@ def random_name():
     return random.choice(first_names) + ' ' + random.choice(last_names)
 
 
+def random_date():
+    tz = pytz.timezone('US/Pacific-New')
+    year = random.randint(1999, 2009)
+    month = random.randint(1, 12)
+    day = random.randint(1, 28)
+    hour = random.randint(0, 23)
+    minute = random.randint(0, 59)
+    second = random.randint(0, 59)
+    return tz.localize(datetime(year, month, day, hour, minute, second))
+
+
 def random_sentence():
     return (
         'The ' + random.choice(nouns) + ' ' + random.choice(verbs) + ' ' +
@@ -33,15 +46,22 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Create 20 random authors.
         authors = []
-        for i in range(0, 20):
+        for _ in range(0, 20):
             author = Author()
             author.name = random_name()
             author.save()
             authors.append(author)
 
         # Create 20 random stories.
-        for i in range(0, 20):
+        for _ in range(0, 20):
             story = Story()
             story.title = random_sentence()
             story.save()
             story.authors.add(random.choice(authors))
+
+            for __ in range(0, random.randint(1, 5)):
+                segment = StorySegment()
+                segment.story = story
+                segment.contents = random_sentence()
+                segment.published = random_date()
+                segment.save()
