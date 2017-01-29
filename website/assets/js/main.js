@@ -5,5 +5,5 @@
 require('./bootstrap');
 
 $(function() {
-    alert('test');
+    //
 });
