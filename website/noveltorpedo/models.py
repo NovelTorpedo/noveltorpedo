@@ -89,3 +89,6 @@ class StorySegment(models.Model):
 
     class Meta:
         db_table = 'noveltorpedo_story_segments'
+
+    def __str__(self):
+        return self.story.__str__() + ' - ' + self.published.__str__()
