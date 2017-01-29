@@ -5,11 +5,6 @@ from datetime import datetime
 import pytz
 import random
 
-# Truncate the tables.
-cursor = connection.cursor()
-cursor.execute('TRUNCATE TABLE noveltorpedo_author CASCADE')
-cursor.execute('TRUNCATE TABLE noveltorpedo_story CASCADE')
-
 # Seed data.
 first_names = ['Noah', 'Emma', 'Liam', 'Olivia', 'Mason', 'Sophia']
 last_names = ['Jones', 'Taylor', 'Williams', 'Brown']
@@ -58,6 +53,11 @@ def random_chapter():
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
+        # Truncate the tables.
+        cursor = connection.cursor()
+        cursor.execute('TRUNCATE TABLE noveltorpedo_author CASCADE')
+        cursor.execute('TRUNCATE TABLE noveltorpedo_story CASCADE')
+
         # Create 20 random authors.
         authors = []
         for _ in range(20):
