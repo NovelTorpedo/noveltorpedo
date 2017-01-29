@@ -5,7 +5,7 @@ class Host(models.Model):
     """
     Each Host entity is a website/source that we scrape, e.g. spacebattles.com.
     """
-    url = models.CharField(max_length=511)
+    url = models.CharField(max_length=512)
     spider = models.CharField(max_length=255)
     wait = models.IntegerField()
 
@@ -29,7 +29,7 @@ class AuthorAttribute(models.Model):
     """
     author = models.ForeignKey(Author, on_delete=models.CASCADE)
     key = models.CharField(max_length=255)
-    value = models.CharField(max_length=511)
+    value = models.CharField(max_length=512)
 
     class Meta:
         db_table = 'noveltorpedo_author_attributes'
@@ -56,7 +56,7 @@ class StoryAttribute(models.Model):
     """
     story = models.ForeignKey(Story, on_delete=models.CASCADE)
     key = models.CharField(max_length=255)
-    value = models.CharField(max_length=511)
+    value = models.CharField(max_length=512)
 
     class Meta:
         db_table = 'noveltorpedo_story_attributes'
@@ -71,7 +71,7 @@ class StoryHost(models.Model):
     """
     host = models.ForeignKey(Host, on_delete=models.CASCADE)
     story = models.ForeignKey(Story, on_delete=models.CASCADE)
-    url = models.CharField(max_length=511)
+    url = models.CharField(max_length=1024)
     last_scraped = models.DateTimeField()
 
     class Meta:
@@ -83,7 +83,7 @@ class StorySegment(models.Model):
     Each StorySegment entity comprises a body of text, for instance a single chapter of a story.
     """
     story = models.ForeignKey(Story, on_delete=models.CASCADE)
-    title = models.TextField(max_length=511)
+    title = models.CharField(max_length=512)
     contents = models.TextField(default='')
     published = models.DateTimeField()
 
