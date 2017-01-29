@@ -41,6 +41,20 @@ def random_sentence():
     )
 
 
+def random_paragraph():
+    paragraph = ''
+    for _ in range(0, random.randint(5, 30)):
+        paragraph += random_sentence() + ' '
+    return paragraph
+
+
+def random_chapter():
+    chapter = ''
+    for _ in range(0, random.randint(1, 10)):
+        chapter += random_paragraph()
+    return chapter
+
+
 class Command(BaseCommand):
 
     def handle(self, *args, **options):
@@ -62,6 +76,6 @@ class Command(BaseCommand):
             for __ in range(0, random.randint(1, 5)):
                 segment = StorySegment()
                 segment.story = story
-                segment.contents = random_sentence()
+                segment.contents = random_chapter()
                 segment.published = random_date()
                 segment.save()
