@@ -4,7 +4,6 @@ branches:
   - travis
 services:
   - postgresql
-  - elasticsearch
 python:
   - "3.5"
 before_install:
@@ -23,4 +22,4 @@ before_script:
   - python website/manage.py seed
   - python website/manage.py update_index
 script:
-  - python website/noveltorpedo/tests.py
+  - python website/manage.py test
