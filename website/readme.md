@@ -24,7 +24,7 @@ sudo pip install django-haystack
 Database setup, with fresh empty database:
 ```bash
 python3 manage.py migrate
-python3 manage.py loaddata noveltorpedo/fixtures/*.yaml
+python3 manage.py seed
 python3 manage.py rebuild_index
 ```
 
