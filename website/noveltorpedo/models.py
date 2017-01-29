@@ -43,7 +43,7 @@ class Story(models.Model):
     Each Story entity is comprised of one or more Segment entities.
     """
     authors = models.ManyToManyField(Author)
-    hosts = models.ManyToManyField(Host, through=StoryHost)
+    hosts = models.ManyToManyField(Host, through='StoryHost')
     title = models.CharField(max_length=255)
 
     def __str__(self):
@@ -69,8 +69,8 @@ class StoryHost(models.Model):
     """
     This model serves to store additional pivot fields for url and the date last scraped.
     """
-    host = models.IntegerField()
-    story = models.IntegerField()
+    host = models.ForeignKey(Host, on_delete=models.CASCADE)
+    story = models.ForeignKey(Story, on_delete=models.CASCADE)
     url = models.CharField(max_length=511)
     last_scraped = models.DateTimeField()
 
