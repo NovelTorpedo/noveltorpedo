@@ -13,13 +13,14 @@ install:
   - pip install -q elasticsearch
   - pip install -q psycopg2
   - pip install -q pyyaml
+  - pip install -q pytz
   - pip install -q django
   - pip install -q django-haystack
 before_script:
   - sleep 10
   - psql -c 'CREATE DATABASE noveltorpedo;' -U postgres
   - python website/manage.py migrate
-  - python website/manage.py loaddata website/noveltorpedo/fixtures/*.yaml
+  - python website/manage.py seed
   - python website/manage.py update_index
 script:
   - python website/noveltorpedo/tests.py
