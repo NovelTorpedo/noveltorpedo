@@ -43,14 +43,14 @@ def random_sentence():
 
 def random_paragraph():
     paragraph = ''
-    for _ in range(0, random.randint(5, 30)):
+    for _ in range(random.randint(5, 10)):
         paragraph += random_sentence() + ' '
     return paragraph
 
 
 def random_chapter():
     chapter = ''
-    for _ in range(0, random.randint(1, 10)):
+    for _ in range(random.randint(1, 10)):
         chapter += random_paragraph()
     return chapter
 
@@ -60,20 +60,20 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
         # Create 20 random authors.
         authors = []
-        for _ in range(0, 20):
+        for _ in range(20):
             author = Author()
             author.name = random_name()
             author.save()
             authors.append(author)
 
         # Create 20 random stories.
-        for _ in range(0, 20):
+        for _ in range(20):
             story = Story()
             story.title = random_sentence()
             story.save()
             story.authors.add(random.choice(authors))
 
-            for __ in range(0, random.randint(1, 5)):
+            for __ in range(random.randint(1, 5)):
                 segment = StorySegment()
                 segment.story = story
                 segment.contents = random_chapter()
