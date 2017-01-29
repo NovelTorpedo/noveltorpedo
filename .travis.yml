@@ -1,4 +1,7 @@
 language: python
+branches:
+  - master
+  -travis
 services:
   - postgresql
   - elasticsearch
