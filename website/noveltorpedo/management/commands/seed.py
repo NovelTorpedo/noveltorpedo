@@ -71,8 +71,12 @@ class Command(BaseCommand):
             story = Story()
             story.title = random_sentence()
             story.save()
-            story.authors.add(random.choice(authors))
 
+            # Add 1 to 3 random authors.
+            for __ in range(random.randint(1, 3)):
+                story.authors.add(random.choice(authors))
+
+            # Add 1 to 5 random segments.
             for __ in range(random.randint(1, 5)):
                 segment = StorySegment()
                 segment.story = story
