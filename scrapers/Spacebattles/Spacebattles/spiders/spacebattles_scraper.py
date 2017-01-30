@@ -34,9 +34,13 @@ class StorySpider(scrapy.Spider):
         urls = self.get_thread_urls(response)
     
         for url in urls:
-            thread_queue.insert(0, url)
+            self.thread_queue.insert(0, url)
 
-        yield scrapy.Request(url, callback=self.scan_thread)
+        
+        if len(thread_queue) > 0:
+            url = thread_queue.pop()
+            yield scrapy.Request(url, callback=self.scan_thread)
+        
         
         #TODO: ADD CHECK HERE to only proceed when the thread_queue is empty!!!
         """
@@ -89,3 +93,26 @@ class StorySpider(scrapy.Spider):
         """
 
         print("\nscraping thread {0}\n".format(response.url))
+
+        
+
+
+
+        
+
+
+    def get_thread_marks(self, response):
+    
+    """ Gets all the threadmark urls for a story
+
+    Keyword arguments:
+    response -- the response object used to navigate the page
+
+    
+    Return Value:
+        ret  -- a list of urls to all thread marks for the given thread
+    """
+
+
+
+
