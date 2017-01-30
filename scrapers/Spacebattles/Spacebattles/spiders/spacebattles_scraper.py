@@ -33,14 +33,10 @@ class StorySpider(scrapy.Spider):
 
         urls = self.get_thread_urls(response)
     
-        for url in urls:
-            self.thread_queue.insert(0, url)
-
+        #for url in urls:
+        #    yield scrapy.Request(url, callback=self.scan_thread) 
         
-        if len(thread_queue) > 0:
-            url = thread_queue.pop()
-            yield scrapy.Request(url, callback=self.scan_thread)
-        
+        yield scrapy.Request(urls[0], callback=self.scan_thread)
         
         #TODO: ADD CHECK HERE to only proceed when the thread_queue is empty!!!
         """
@@ -87,6 +83,12 @@ class StorySpider(scrapy.Spider):
 
         """ Scan the actual thread for story and author content
 
+        This looks for any threadmarks, processes them, and
+        follows the last threadmark's "next" link.
+        If the page doesn't have any threadmarks, or there is
+        no next link, it gracefully closes.
+
+
         Keyword arguments:
         response -- the response object used to navigate the page
 
@@ -94,24 +96,33 @@ class StorySpider(scrapy.Spider):
 
         print("\nscraping thread {0}\n".format(response.url))
 
+        div_tmarks = response.xpath("//li[contains(@class, 'hasThreadmark')]")
         
+        if div_tmarks is not None and len(div_tmarks) > 0:
+            
+            for div_tmark in div_tmarks:
+                author = div_tmark.xpath("@data-author").extract()
+                title = div_tmark.xpath("div/span/text()").extract()
+            
+                print("Title: {0}   Author: {1}".format(title, author))
+
+
+            div_next_tmark = div_tmarks[-1].xpath(".//span[@class='next']")
+            
+            if div_next_tmark is not None:
+                next_mark = div_next_tmark.xpath("a/@href").extract_first() 
+                print("Next url: {0}".format(next_mark))
+                next_mark_url = response.urljoin(next_mark)
+                yield scrapy.Request(next_mark_url, callback=self.scan_thread)
+
+
+
+
+            
 
 
 
         
-
-
-    def get_thread_marks(self, response):
-    
-    """ Gets all the threadmark urls for a story
-
-    Keyword arguments:
-    response -- the response object used to navigate the page
-
-    
-    Return Value:
-        ret  -- a list of urls to all thread marks for the given thread
-    """
 
 
 
