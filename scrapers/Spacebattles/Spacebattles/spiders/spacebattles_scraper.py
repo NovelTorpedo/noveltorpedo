@@ -1,8 +1,11 @@
 import scrapy
+import time
+
 
 
 class StorySpider(scrapy.Spider):
     name = "stories"
+    
 
     thread_queue = []
 
@@ -32,11 +35,14 @@ class StorySpider(scrapy.Spider):
         next_page_link = next_page_link.xpath('@href').extract_first()
 
         urls = self.get_thread_urls(response)
-    
-        #for url in urls:
-        #    yield scrapy.Request(url, callback=self.scan_thread) 
+
+        for url in urls:
+            yield scrapy.Request(url, callback=self.scan_thread, priority=1) 
+            
         
-        yield scrapy.Request(urls[0], callback=self.scan_thread)
+        
+        
+        #yield scrapy.Request(urls[0], callback=self.scan_thread)
         
         #TODO: ADD CHECK HERE to only proceed when the thread_queue is empty!!!
         """
@@ -113,7 +119,7 @@ class StorySpider(scrapy.Spider):
                 next_mark = div_next_tmark.xpath("a/@href").extract_first() 
                 print("Next url: {0}".format(next_mark))
                 next_mark_url = response.urljoin(next_mark)
-                yield scrapy.Request(next_mark_url, callback=self.scan_thread)
+                yield scrapy.Request(next_mark_url, callback=self.scan_thread, priority=2)
 
 
 
