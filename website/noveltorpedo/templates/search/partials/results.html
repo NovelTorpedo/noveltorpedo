@@ -1,0 +1,16 @@
+{% load highlight %}
+
+{% for result in page.object_list %}
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <a href="{{ result.object.get_absolute_url }}">
+                {{ result.object.title }}
+            </a>
+        </div>
+        <div class="panel-body">
+            {% highlight result.text with query %}
+        </div>
+    </div>
+{% empty %}
+    <p>No results found.</p>
+{% endfor %}
