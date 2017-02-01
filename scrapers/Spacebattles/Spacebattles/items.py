@@ -8,7 +8,17 @@
 import scrapy
 
 
-class SpacebattlesItem(scrapy.Item):
+class StorySegment(scrapy.Item):
     # define the fields for your item here like:
-    # name = scrapy.Field()
-    pass
+    #  = scrapy.Field()
+    content = scrapy.Field()
+    nsfw_flag = scrapy.Field()
+    next_url = scrapy.Field()
+
+
+class Story(scrapy.Item):
+    title = scrapy.Field()
+    author = scrapy.Field()
+    # nsfw_flag = scrapy.Field()
+    url = scrapy.Field()
+    segments = []

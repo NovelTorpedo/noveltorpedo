@@ -2,10 +2,9 @@ import scrapy
 import time
 
 
-
 class StorySpider(scrapy.Spider):
     name = "stories"
-    
+    priority = 1
 
     thread_queue = []
 
@@ -25,7 +24,7 @@ class StorySpider(scrapy.Spider):
         response -- the response object used to navigate the page
 
         """
-        #insert while loop here later to scan THROUGH the threads
+        # insert while loop here later to scan THROUGH the threads
 
         # ------
         current_page = response.xpath("//a[@class='currentPage ']/text()")
@@ -37,20 +36,17 @@ class StorySpider(scrapy.Spider):
         urls = self.get_thread_urls(response)
 
         for url in urls:
-            yield scrapy.Request(url, callback=self.scan_thread, priority=1) 
-            
+            yield scrapy.Request(url, callback=self.scan_thread, priority=0)
+
+        # yield scrapy.Request(urls[0], callback=self.scan_thread)
         
-        
-        
-        #yield scrapy.Request(urls[0], callback=self.scan_thread)
-        
-        #TODO: ADD CHECK HERE to only proceed when the thread_queue is empty!!!
+        # TODO: ADD CHECK HERE to only proceed when the thread_queue is empty!!!
         """
         if next_page_link is not None:
 
             #print("next page link: {0}".format(next_page_link))
             next_page_link = response.urljoin(next_page_link)
-            yield scrapy.Request(next_page_link, callback=self.loop_pages)
+            yield scrapy.Request(next_page_link, callback=self.loop_pages, priority=0)
         """
 
     def get_thread_urls(self, response):
@@ -74,14 +70,14 @@ class StorySpider(scrapy.Spider):
             a_node = thread_tag.xpath("div/div/h3/a")
             thread_url = a_node.xpath("@href").extract_first()
 
-            #print("\nauthors: {0}".format(author))
-            #print(  "    url: {0}".format(thread_url))
+            # print("\nauthors: {0}".format(author))
+            # print(  "    url: {0}".format(thread_url))
 
             if thread_url is not None:
 
                 thread_link = response.urljoin(thread_url)
                 urls.append(thread_link)
-                #yield scrapy.Request(thread_link, callback=self.scan_thread)
+                # yield scrapy.Request(thread_link, callback=self.scan_thread)
 
         return urls
 
@@ -107,11 +103,16 @@ class StorySpider(scrapy.Spider):
         if div_tmarks is not None and len(div_tmarks) > 0:
             
             for div_tmark in div_tmarks:
-                author = div_tmark.xpath("@data-author").extract()
-                title = div_tmark.xpath("div/span/text()").extract()
-            
-                print("Title: {0}   Author: {1}".format(title, author))
+                author = div_tmark.xpath("@data-author").extract_first()
+                title = "".join(div_tmark.xpath("div/span/text()").extract())
 
+                date_time = div_tmark.xpath(".//span[@class='DateTime']/@title").extract_first()
+                content = div_tmark.xpath(".//blockquote/text()").extract_first()
+                content = content.encode('utf-8')
+
+                print("Title: {0}   Author: {1}".format(title, author))
+                print("date_time: {0}".format(date_time))
+                print("content: {0}".format(content[0:200]))
 
             div_next_tmark = div_tmarks[-1].xpath(".//span[@class='next']")
             
