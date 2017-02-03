@@ -3,6 +3,7 @@ import time
 import sys
 import os
 from django.conf import settings
+from django.db import connection
 import django
 
 
@@ -79,6 +80,7 @@ class StorySpider(scrapy.Spider):
         li_tags = response.xpath("//li[@class='discussionListItem visible  ']")
 
         for thread_tag in li_tags:
+            story = Story()
             author = thread_tag.xpath('@data-author').extract()
             a_node = thread_tag.xpath("div/div/h3/a")
             thread_url = a_node.xpath("@href").extract_first()
