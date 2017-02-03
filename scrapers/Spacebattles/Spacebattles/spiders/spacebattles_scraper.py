@@ -1,10 +1,23 @@
 import scrapy
 import time
+import sys
+import os
+from django.conf import settings
+import django
+
+
+sys.path.insert(0, "../../website")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+# setup_environ(settings)
+django.setup()
+
+from noveltorpedo.models import *
 
 
 class StorySpider(scrapy.Spider):
     name = "stories"
     priority = 1
+    host = "spacebattles.com"
 
     thread_queue = []
 
