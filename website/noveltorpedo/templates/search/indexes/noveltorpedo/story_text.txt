@@ -1,2 +1,8 @@
 {{ object.title }}
-{{ object.contents }}
+{% for author in object.authors.all %}
+    {{ author.name }}
+{% endfor %}
+{% for segment in object.storysegment_set.all %}
+    {{ segment.title }}
+    {{ segment.contents }}
+{% endfor %}
