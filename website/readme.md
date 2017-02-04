@@ -4,7 +4,13 @@
 * [Front-end Installation](#front-end-installation)
 * [Database / Search Index Schema Installation](#database--search-index-schema-installation)
 * [Back-end Development Notes](#back-end-development-notes)
-    * [Updating Models / Database Schema](#updating-models-database-schema)
+    * [Updating Models / Database Schema](#updating-models--database-schema)
+* [Front-end Development Notes](#front-end-development-notes)
+    * [JavaScript](#javascript)
+    * [Sass / CSS](#sass--css)
+
+***NOTE:***  Ensure you are in the `website` directory when executing the website development
+commands throughout this documentation.
 
 ## Back-end Installation
 
@@ -53,7 +59,6 @@ sudo yarn global add gulp
 
 Install the front-end packages via yarn (this will resolve packages using the yarn.lock file):
 ```bash
-cd website
 yarn
 ```
 
@@ -95,7 +100,7 @@ python3 manage.py test
 
 ### Updating Models / Database Schema
 
-First, edit the models in `website/noveltorpedo/models.py`.
+First, edit the models in `noveltorpedo/models.py`.
 
 When you are satisfied, delete the existing migrations:
 ```bash
@@ -114,3 +119,45 @@ CREATE DATABASE noveltorpedo;
 ```
 
 And then [install the new schema](#database--search-index-schema-installation).
+
+## Front-end Development Notes
+
+The file `gulpfile.js` defines all of our front-end build (gulp) configurations.
+
+### JavaScript
+
+All JavaScript should be written in [ECMAScript 6](http://es6-features.org/).
+
+For cleanliness and ease-of-use, *all* JavaScript is loaded/defined in `assets/js/main.js`.
+
+That file looks like this:
+```javascript
+require('./bootstrap');
+
+$(function() {
+    // Global JavaScript can go here if you'd like.
+});
+```
+
+Feel free to create other JavaScript files and load them through `assets/js/bootstrap.js`.
+
+For instance, if you create the file `assets/js/my-javascript-file.js`, you can alter the bootstrap
+file to load your JavaScript like so (note the added line):
+
+```javascript
+window._ = require('lodash');
+window.$ = window.jQuery = require('jquery');
+require('bootstrap-sass');
+require('./my-javascript-file'); // <-- Added this line.
+```
+
+### Sass / CSS
+
+Similarly to JavaScript, *all* Sass/CSS is loaded through `assets/sass/main.scss`.
+
+Global CSS should be placed in `assets/sass/_global.scss`.
+
+Feel free to create as many other scss files as you'd like, ensuring to prepend them with an underscore
+and load them in `assets/sass/main.scss`.
+
+For instance, if you create the file ``
