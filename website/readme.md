@@ -22,6 +22,37 @@ CREATE DATABASE noveltorpedo;
 Install [Elasticsearch 2.4.4](https://www.elastic.co/downloads/past-releases/elasticsearch-2-4-4) (the default
 configuration is fine).
 
+## Front-end Installation
+
+Install [yarn](https://yarnpkg.com/):
+```bash
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt update
+sudo apt install yarn
+```
+
+Install [gulp](http://gulpjs.com/) globally:
+```bash
+yarn global add gulp
+```
+
+Install the front-end packages via yarn (this will resolve packages using the yarn.lock file):
+```bash
+cd website
+yarn
+```
+
+To compile front-end assets (CSS/JS) once:
+```bash
+yarn run dev
+```
+
+To compile front-end assets (CSS/JS) continuously in real-time:
+```bash
+yarn run watch
+```
+
 ## Database / Search Index Migrations and Seeding
 
 Database setup, with fresh empty database:
