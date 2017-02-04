@@ -3,6 +3,18 @@
 import pytumblr
 from secrets import consumer_key, secret_key, oauth_token, oauth_secret
 
+import django
+from django.conf import settings
+from django.db import connection
+import sys
+import os
+
+sys.path.insert(0, "../../website")
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+django.setup()
+
+from noveltorpedo import models
+
 client = pytumblr.TumblrRestClient(
         consumer_key,
         secret_key,
