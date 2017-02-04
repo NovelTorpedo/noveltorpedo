@@ -160,4 +160,10 @@ Global CSS should be placed in `assets/sass/_global.scss`.
 Feel free to create as many other scss files as you'd like, ensuring to prepend them with an underscore
 and load them in `assets/sass/main.scss`.
 
-For instance, if you create the file ``
+For instance, if you create the file `assets/sass/_my-sass-file.scss`, you can alter
+`assets/sass/main.scss` like so (note the added line):
+```sass
+@import "bootstrap";
+@import "global";
+@import "my-sass-file"; // <-- Added this line.
+```
