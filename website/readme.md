@@ -20,7 +20,13 @@ CREATE DATABASE noveltorpedo;
 ```
 
 Install [Elasticsearch 2.4.4](https://www.elastic.co/downloads/past-releases/elasticsearch-2-4-4) (the default
-configuration is fine).
+configuration is fine):
+```bash
+wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.4/elasticsearch-2.4.4.deb
+sudo dpkg -i elasticsearch-2.4.4.deb
+rm -f elasticsearch-2.4.4.deb
+sudo systemctl enable elasticsearch.service
+```
 
 ## Front-end Installation
 
