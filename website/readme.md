@@ -1,4 +1,12 @@
-## Installation Notes
+## Table of Contents
+
+* [Back-end Installation](#back-end-installation)
+* [Front-end Installation](#front-end-installation)
+* [Database / Search Index Schema Installation](#database-search-index-schema-installation)
+* [Back-end Development Notes](#back-end-development-notes)
+    * [Updating Models / Database Schema](#updating-models-database-schema)
+
+## Back-end Installation
 
 Install Python dependencies:
 ```bash
@@ -59,7 +67,7 @@ To compile front-end assets (CSS/JS) continuously in real-time:
 yarn run watch
 ```
 
-## Database / Search Index Migrations and Seeding
+## Database / Search Index Schema Installation
 
 Database setup, with fresh empty database:
 ```bash
@@ -68,14 +76,41 @@ python3 manage.py seed
 python3 manage.py rebuild_index
 ```
 
-## Development Notes
+## Back-end Development Notes
 
 To run the development server:
 ```bash
 python3 manage.py runserver
 ```
 
+You can then visit the website at:
+```bash
+http://127.0.0.1:8000/
+```
+
 To run all tests:
 ```bash
 python3 manage.py test
 ```
+
+### Updating Models / Database Schema
+
+First, edit the models in `website/noveltorpedo/models.py`.
+
+When you are satisfied, delete the existing migrations:
+```bash
+rm -f noveltorpedo/migrations/0001_initial.py
+```
+
+And finally, re-generate the migrations:
+```bash
+python3 manage.py makemigrations
+```
+
+Now that you have a new schema, you can "flush" your Postgres database like so:
+```bash
+DROP DATABASE noveltorpedo;
+CREATE DATABASE noveltorpedo;
+```
+
+And then [install the new schema](#database-search-index-schema-installation).
