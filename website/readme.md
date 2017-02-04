@@ -57,7 +57,7 @@ Install [gulp](http://gulpjs.com/) globally:
 sudo yarn global add gulp
 ```
 
-Install the front-end packages via yarn (this will resolve packages using the yarn.lock file):
+Install the front-end packages via yarn (this will resolve packages using the `yarn.lock` file):
 ```bash
 yarn
 ```
