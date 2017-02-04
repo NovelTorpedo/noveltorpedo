@@ -30,3 +30,15 @@ python3 manage.py migrate
 python3 manage.py seed
 python3 manage.py rebuild_index
 ```
+
+## Development Notes
+
+To run the development server:
+```bash
+python3 manage.py runserver
+```
+
+To run all tests:
+```bash
+python3 manage.py test
+```
