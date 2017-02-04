@@ -50,20 +50,36 @@ def get_posts(blog, offset=0, limit=20):
     return client.posts(blog, type="text", filter="text",
                         offset=offset, limit=limit)["posts"]
 
+def create_host():
+    """
+    Initialize the Tumblr host entry in the database.
+    """
+    host = models.Host()
+    host.url = "tumblr.com"
+    host.spider = "scrapers/tumblr/fetch_tumblr.py"
+    host.wait = 1 # per their robots.txt
+    host.save()
+    return host
+
 if __name__ == "__main__":
     """
     This allows you to pass the short name of a tumblr on the command line to
-    get a summary of recent text posts. A couple examples to test on:
+    verify that its information can be retrieved from the API. Examples:
         antlerscolorado
         docfuture
+    For the moment it will also create the host entry (without checking to see
+    if it already existed).
     """
     import sys
     try:
         blog = sys.argv[1]
-        print("{title} ({url})".format(**get_info(blog)))
-        for post in get_posts(blog):
-            print("\t{timestamp} - {title} ({short_url})".format(**post))
+        info = get_info(blog)
+        posts = get_posts(blog)
     except IndexError:
         print("Please supply a tumblr name.")
+        sys.exit(1)
     except KeyError:
         print("Tumblr not found.")
+        sys.exit(1)
+
+    create_host()
