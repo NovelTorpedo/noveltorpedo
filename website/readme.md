@@ -2,7 +2,7 @@
 
 * [Back-end Installation](#back-end-installation)
 * [Front-end Installation](#front-end-installation)
-* [Database / Search Index Schema Installation](#database-search-index-schema-installation)
+* [Database / Search Index Schema Installation](#database--search-index-schema-installation)
 * [Back-end Development Notes](#back-end-development-notes)
     * [Updating Models / Database Schema](#updating-models-database-schema)
 
@@ -113,4 +113,4 @@ DROP DATABASE noveltorpedo;
 CREATE DATABASE noveltorpedo;
 ```
 
-And then [install the new schema](#database-search-index-schema-installation).
+And then [install the new schema](#database--search-index-schema-installation).
