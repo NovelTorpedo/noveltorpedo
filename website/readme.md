@@ -107,10 +107,12 @@ When you are satisfied, delete the existing migrations:
 rm -f noveltorpedo/migrations/0001_initial.py
 ```
 
-And finally, re-generate the migrations:
+You can now re-generate the migrations:
 ```bash
 python3 manage.py makemigrations
 ```
+
+**Please commit and push the updated models/migrations to the `master` branch.**
 
 Now that you have a new schema, you can "flush" your Postgres database like so:
 ```bash
