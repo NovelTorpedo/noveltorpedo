@@ -52,13 +52,15 @@ def get_posts(blog, offset=0, limit=20):
 
 def create_host():
     """
-    Initialize the Tumblr host entry in the database.
+    Create the Tumblr host entry in the database iff it doesn't exist.
     """
-    host = models.Host()
-    host.url = "tumblr.com"
-    host.spider = "scrapers/tumblr/fetch_tumblr.py"
-    host.wait = 1 # per their robots.txt
-    host.save()
+    host = models.Host.objects.filter(url = "tumblr.com")
+    if not host:
+        host = models.Host()
+        host.url = "tumblr.com"
+        host.spider = "scrapers/tumblr/fetch_tumblr.py"
+        host.wait = 1 # per their robots.txt
+        host.save()
     return host
 
 if __name__ == "__main__":
@@ -67,8 +69,7 @@ if __name__ == "__main__":
     verify that its information can be retrieved from the API. Examples:
         antlerscolorado
         docfuture
-    For the moment it will also create the host entry (without checking to see
-    if it already existed).
+    Also creates the Tumblr host entry in the database if it doesn't exist.
     """
     import sys
     try:
