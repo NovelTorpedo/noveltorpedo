@@ -71,9 +71,9 @@ yarn run watch
 
 Database setup, with fresh empty database:
 ```bash
-python3 manage.py migrate
-python3 manage.py seed
-python3 manage.py rebuild_index
+python3 manage.py migrate          # Create the Postgres tables.
+python3 manage.py seed             # Populate the Postgres tables.
+python3 manage.py rebuild_index    # Populate the Elasticsearch index.
 ```
 
 ## Back-end Development Notes
