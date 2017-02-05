@@ -47,10 +47,11 @@ class StorySpider(scrapy.Spider):
         next_page_link = response.xpath("//a[@class='text' and contains(., 'Next')]")
         next_page_link = next_page_link.xpath('@href').extract_first()
 
-        urls = self.get_thread_urls(response)
+        # urls_stories is a touple with a url, and a corresponding Story object
+        urls_stories = self.get_thread_urls(response)
 
-        for url in urls:
-            yield scrapy.Request(url, callback=self.scan_thread, priority=0)
+        for (url, story) in urls_stories:
+            yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
 
         # yield scrapy.Request(urls[0], callback=self.scan_thread)
         
@@ -75,26 +76,28 @@ class StorySpider(scrapy.Spider):
         """
 
         print("scraping {0}".format(response.url))
-        urls = []
+        url_stories = []
 
         li_tags = response.xpath("//li[@class='discussionListItem visible  ']")
 
         for thread_tag in li_tags:
             story = Story()
-            author = thread_tag.xpath('@data-author').extract()
+            story.author = thread_tag.xpath('@data-author').extract()
+            story.title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract()
+
             a_node = thread_tag.xpath("div/div/h3/a")
             thread_url = a_node.xpath("@href").extract_first()
 
-            # print("\nauthors: {0}".format(author))
-            # print(  "    url: {0}".format(thread_url))
+            print("\nauthors: {0}".format(author))
+            print(  "    url: {0}".format(thread_url))
 
             if thread_url is not None:
 
                 thread_link = response.urljoin(thread_url)
-                urls.append(thread_link)
+                url_stories.append((thread_link, story))
                 # yield scrapy.Request(thread_link, callback=self.scan_thread)
 
-        return urls
+        return url_stories
 
     def scan_thread(self, response):
 
