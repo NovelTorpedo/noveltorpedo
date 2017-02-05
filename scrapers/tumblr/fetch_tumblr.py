@@ -1,6 +1,9 @@
 #!/usr/bin/python
 
-from datetime import datetime, MINYEAR
+from datetime import datetime
+from pytz import utc
+from time import sleep
+
 import pytumblr
 from secrets import consumer_key, secret_key, oauth_token, oauth_secret
 
@@ -20,33 +23,8 @@ from noveltorpedo import models
 client = None   # Tumblr API client
 host = None     # Tumblr Host object in the database
 
-def get_info(blog):
-    """
-    Fetch general information about the blog being tracked. Returns a
-    dictionary.  Keys which are likely to be useful:
-        title
-        url
-        description
-        is_nsfw (boolean)
-        updated (most recent post's timestamp, in integer seconds since epoch)
-    """
-    return client.blog_info(blog)["blog"]
-
-def get_posts(blog, offset=0, limit=20):
-    """
-    Fetch post contents and metadata. Parameters:
-        offset (how many posts back to begin)
-        limit (how many posts to return; 20 is the max allowed by the API)
-    Returns a list of dictionaries. Keys which are likely to be useful:
-        blog_name
-        body
-        post_url
-        short_url
-        timestamp
-        title
-    """
-    return client.posts(blog, type="text", filter="text",
-                        offset=offset, limit=limit)["posts"]
+# This is defined by Tumblr's API.
+MAX_POSTS = 20
 
 def get_host():
     """
@@ -56,16 +34,17 @@ def get_host():
     """
     global host
     if not host:
-        host = models.Host.objects.filter(url = "tumblr.com").first()
-    if not host:
-        host = models.Host()
-        host.url = "tumblr.com"
-        host.spider = "scrapers/tumblr/fetch_tumblr.py"
-        host.wait = 1 # per their robots.txt
-        host.save()
+        try:
+            host = models.Host.objects.get(url = "tumblr.com")
+        except models.Host.DoesNotExist:
+            host = models.Host()
+            host.url = "tumblr.com"
+            host.spider = "scrapers/tumblr/fetch_tumblr.py"
+            host.wait = 1 # per their robots.txt
+            host.save()
     return host
 
-def make_story(blog):
+def create_story(blog):
     """
     Add a new story to the database. Takes a Tumblr blog name and returns
     the corresponding Story object. Does no verification that the story
@@ -85,20 +64,66 @@ def make_story(blog):
     storyhost.host = get_host()
     storyhost.url = blog + ".tumblr.com"
     storyhost.story = story
-    storyhost.last_scraped = datetime(MINYEAR, 1, 1)
+    storyhost.last_scraped = datetime.min.replace(tzinfo=utc)
     storyhost.save()
+
+    print story
+    print "---"
+
+def update_story(blog):
+    """
+    Retrieve any posts which have been added to a story since its last
+    scraped timestamp. Assumes that the story is already in the database,
+    and there are text posts on the blog. Returns nothing.
+    """
+    storyhost = models.StoryHost.objects.get(url = blog + ".tumblr.com")
+    oldest_new = datetime.now(utc)
+    offset = 0
+    posts = get_posts(blog)
+    post = posts.pop(0)
+    post_date = datetime.fromtimestamp(post["timestamp"], utc)
+    while post_date > storyhost.last_scraped:
+        segment = models.StorySegment()
+        segment.story = storyhost.story
+        segment.title = post["title"]
+        segment.contents = post["body"]
+        segment.published = oldest_new
+        segment.save()
+        print segment
+        try:
+            post = posts.pop(0)
+        except IndexError:
+            sleep(get_host().wait)
+            offset = offset + MAX_POSTS
+            posts = get_posts(blog, offset)
+            if not posts:
+                break
+            post = posts.pop(0)
+        post_date = datetime.fromtimestamp(post["timestamp"], utc)
+    storyhost.last_scraped = datetime.now(utc)
+    storyhost.save()
+
+def get_posts(blog, offset=0, limit=MAX_POSTS):
+    """
+    Fetch post contents and metadata. Parameters:
+        offset (how many posts back to begin)
+        limit (how many posts to return; 20 is the max allowed by the API)
+    Returns a list of dictionaries.
+    TODO: Move the wait timer over here.
+    """
+    return client.posts(blog, type="text", filter="text",
+                        offset=offset, limit=limit)["posts"]
 
 if __name__ == "__main__":
     """
     This allows you to pass the short name of a tumblr on the command line to
-    add it as a new entry to the story database. Doesn't retrieve posts yet.
+    add it to the database, including its text posts.
     """
     import sys
     client = pytumblr.TumblrRestClient(consumer_key, secret_key, oauth_token,
                                        oauth_secret)
     try:
         blog = sys.argv[1]
-        info = get_info(blog)
         posts = get_posts(blog)
     except IndexError:
         print("Please supply a tumblr name.")
@@ -107,4 +132,5 @@ if __name__ == "__main__":
         print("Tumblr not found.")
         sys.exit(1)
 
-    make_story(blog)
+    create_story(blog)
+    update_story(blog)
