@@ -19,18 +19,17 @@ django.setup()
 
 from noveltorpedo import models
 
-# These globals will be initialized later.
-client = None   # Tumblr API client
-host = None     # Tumblr Host object in the database
+host = None
+client = pytumblr.TumblrRestClient(consumer_key, secret_key,
+                                   oauth_token, oauth_secret)
 
 # This is defined by Tumblr's API.
 MAX_POSTS = 20
 
 def get_host():
     """
-    Create the Tumblr host entry in the database iff it doesn't exist.
-    In either case, returns the appropriate Host object, as well as saving
-    it in a global variable so we don't have to query for it again.
+    Retrieves the Tumblr host entry from the database, creating it first if it
+    didn't already exist and caching it if it did. Returns a Host object.
     """
     global host
     if not host:
@@ -47,28 +46,29 @@ def get_host():
 def create_story(blog):
     """
     Add a new story to the database. Takes a Tumblr blog name and returns
-    the corresponding Story object. Does no verification that the story
-    hasn't already been added, and returns nothing.
+    the corresponding StoryHost object. If it was already in the database,
+    returns the existing one.
     """
-    blog_info = client.blog_info(blog)["blog"]
-    story = models.Story()
-    story.title = blog_info["title"]
-    story.save()
+    try:
+        storyhost = models.StoryHost.objects.get(url = blog + ".tumblr.com")
+    except models.StoryHost.DoesNotExist:
+        blog_info = client.blog_info(blog)["blog"]
+        story = models.Story()
+        story.title = blog_info["title"]
+        story.save()
 
-    author = models.Author()
-    author.name = blog
-    author.save()
-    story.authors.add(author)
+        author = models.Author()
+        author.name = blog
+        author.save()
+        story.authors.add(author)
 
-    storyhost = models.StoryHost()
-    storyhost.host = get_host()
-    storyhost.url = blog + ".tumblr.com"
-    storyhost.story = story
-    storyhost.last_scraped = datetime.min.replace(tzinfo=utc)
-    storyhost.save()
-
-    print story
-    print "---"
+        storyhost = models.StoryHost()
+        storyhost.host = get_host()
+        storyhost.url = blog + ".tumblr.com"
+        storyhost.story = story
+        storyhost.last_scraped = datetime.min.replace(tzinfo=utc)
+        storyhost.save()
+    return storyhost
 
 def update_story(blog):
     """
@@ -109,28 +109,20 @@ def get_posts(blog, offset=0, limit=MAX_POSTS):
         offset (how many posts back to begin)
         limit (how many posts to return; 20 is the max allowed by the API)
     Returns a list of dictionaries.
-    TODO: Move the wait timer over here.
     """
     return client.posts(blog, type="text", filter="text",
                         offset=offset, limit=limit)["posts"]
 
 if __name__ == "__main__":
     """
-    This allows you to pass the short name of a tumblr on the command line to
-    add it to the database, including its text posts.
+    Takes the username of a tumblr account on the command line and adds its
+    text posts to the database. Assumes the blog exists and has at least one
+    text post.
     """
-    import sys
-    client = pytumblr.TumblrRestClient(consumer_key, secret_key, oauth_token,
-                                       oauth_secret)
     try:
         blog = sys.argv[1]
-        posts = get_posts(blog)
     except IndexError:
         print("Please supply a tumblr name.")
-        sys.exit(1)
-    except KeyError:
-        print("Tumblr not found.")
-        sys.exit(1)
-
-    create_story(blog)
-    update_story(blog)
+    else:
+        create_story(blog)
+        update_story(blog)
