@@ -43,6 +43,9 @@ sudo systemctl enable elasticsearch.service
 sudo systemctl start elasticsearch
 ```
 
+If you do not need to use the website's front-end, you may now skip to
+[Database / Search Index Schema Installation](#database--search-index-schema-installation).
+
 ## Front-end Installation
 
 Install [yarn](https://yarnpkg.com/):
