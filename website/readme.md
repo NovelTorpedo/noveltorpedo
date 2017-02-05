@@ -1,33 +1,171 @@
-## Installation Notes
+## Table of Contents
 
-Install dependencies:
+* [Back-end Installation](#back-end-installation)
+* [Front-end Installation](#front-end-installation)
+* [Database / Search Index Schema Installation](#database--search-index-schema-installation)
+* [Back-end Development Notes](#back-end-development-notes)
+    * [Updating Models / Database Schema](#updating-models--database-schema)
+* [Front-end Development Notes](#front-end-development-notes)
+    * [JavaScript](#javascript)
+    * [Sass / CSS](#sass--css)
+
+***NOTE:***  Ensure you are in the `website` directory when executing the website development
+commands throughout this documentation.
+
+## Back-end Installation
+
+Install Python dependencies:
 ```bash
 sudo apt update
 sudo apt install python3-django             # 1.8.7-1ubuntu5.4
 sudo apt install python3-elasticsearch      # 1.6.0-1
 sudo apt install python3-yaml               # 3.11-3build1
 sudo apt install python3-psycopg2           # 2.6.1-1build2
-
-elasticsearch 2.4.4:  https://www.elastic.co/downloads/past-releases/elasticsearch-2-4-4
-django-haystack 2.6.0:  https://django-haystack.readthedocs.io/en/v2.6.0/index.html
-postgresql 9.5+173
-```
-
-I am currently installing Haystack with pip, since the apt package `python3-django-haystack` is an older version:
-```bash
 sudo apt install python3-pip
-sudo pip install django-haystack 
+sudo pip3 install django-haystack           # Latest (since apt `python3-django-haystack` is out-of-date)
 ```
 
-## Database / Search Index Migrations and Seeding
+Install PostgreSQL and create database:
+```bash
+sudo apt install postgresql postgresql-contrib
+sudo -u postgres psql
+ALTER USER postgres WITH PASSWORD 'secret';
+CREATE DATABASE noveltorpedo;
+```
+
+Install [Elasticsearch 2.4.4](https://www.elastic.co/downloads/past-releases/elasticsearch-2-4-4) (the default
+configuration is fine):
+```bash
+wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.4/elasticsearch-2.4.4.deb
+sudo dpkg -i elasticsearch-2.4.4.deb
+rm -f elasticsearch-2.4.4.deb
+sudo systemctl enable elasticsearch.service
+```
+
+## Front-end Installation
+
+Install [yarn](https://yarnpkg.com/):
+```bash
+curl -sS https://dl.yarnpkg.com/debian/pubkey.gpg | sudo apt-key add -
+echo "deb https://dl.yarnpkg.com/debian/ stable main" | sudo tee /etc/apt/sources.list.d/yarn.list
+sudo apt update
+sudo apt install yarn
+```
+
+Install [gulp](http://gulpjs.com/) globally:
+```bash
+sudo yarn global add gulp
+```
+
+Install the front-end packages via yarn (this will resolve packages using the `yarn.lock` file):
+```bash
+yarn
+```
+
+To compile front-end assets (CSS/JS) once:
+```bash
+yarn run dev
+```
+
+To compile front-end assets (CSS/JS) continuously in real-time:
+```bash
+yarn run watch
+```
+
+## Database / Search Index Schema Installation
 
 Database setup, with fresh empty database:
 ```bash
-python3 manage.py migrate
-python3 manage.py seed
-python3 manage.py rebuild_index
+python3 manage.py migrate          # Create the Postgres tables.
+python3 manage.py seed             # Populate the Postgres tables.
+python3 manage.py rebuild_index    # Populate the Elasticsearch index.
 ```
 
-## TODO
+## Back-end Development Notes
 
-Check out [Model Mommy](https://github.com/vandersonmota/model_mommy) for better fixtures.
+To run the development server:
+```bash
+python3 manage.py runserver
+```
+
+You can then visit the website at:
+```bash
+http://127.0.0.1:8000/
+```
+
+To run all tests:
+```bash
+python3 manage.py test
+```
+
+### Updating Models / Database Schema
+
+First, edit the models in `noveltorpedo/models.py`.
+
+When you are satisfied, delete the existing migrations:
+```bash
+rm -f noveltorpedo/migrations/0001_initial.py
+```
+
+You can now re-generate the migrations:
+```bash
+python3 manage.py makemigrations
+```
+
+**Please commit and push the updated models/migrations to the `master` branch.**
+
+Now that you have a new schema, you can "flush" your Postgres database like so:
+```bash
+DROP DATABASE noveltorpedo;
+CREATE DATABASE noveltorpedo;
+```
+
+And then [install the new schema](#database--search-index-schema-installation).
+
+## Front-end Development Notes
+
+The file `gulpfile.js` defines all of our front-end build (gulp) configurations.
+
+### JavaScript
+
+All JavaScript should be written in [ECMAScript 6](http://es6-features.org/).
+
+For cleanliness and ease-of-use, *all* JavaScript is loaded/defined in `assets/js/main.js`.
+
+That file looks like this:
+```javascript
+require('./bootstrap');
+
+$(function() {
+    // Global JavaScript can go here if you'd like.
+});
+```
+
+Feel free to create other JavaScript files and load them through `assets/js/bootstrap.js`.
+
+For instance, if you create the file `assets/js/my-javascript-file.js`, you can alter the bootstrap
+file to load your JavaScript like so (note the added line):
+
+```javascript
+window._ = require('lodash');
+window.$ = window.jQuery = require('jquery');
+require('bootstrap-sass');
+require('./my-javascript-file'); // <-- Added this line.
+```
+
+### Sass / CSS
+
+Similarly to JavaScript, *all* Sass/CSS is loaded through `assets/sass/main.scss`.
+
+Global CSS should be placed in `assets/sass/_global.scss`.
+
+Feel free to create as many other scss files as you'd like, ensuring to prepend them with an underscore
+and load them in `assets/sass/main.scss`.
+
+For instance, if you create the file `assets/sass/_my-sass-file.scss`, you can alter
+`assets/sass/main.scss` like so (note the added line):
+```sass
+@import "bootstrap";
+@import "global";
+@import "my-sass-file"; // <-- Added this line.
+```

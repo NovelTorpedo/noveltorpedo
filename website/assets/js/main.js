@@ -5,5 +5,5 @@
 require('./bootstrap');
 
 $(function() {
-    //
+    // Global JavaScript can go here if you'd like.
 });

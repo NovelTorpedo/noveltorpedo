@@ -10,7 +10,7 @@ class Host(models.Model):
     wait = models.IntegerField()
 
     def __str__(self):
-        return self.baseurl
+        return self.url
 
 
 class Author(models.Model):

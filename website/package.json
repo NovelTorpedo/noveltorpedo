@@ -1,5 +1,10 @@
 {
   "private": true,
+  "scripts": {
+    "prod": "gulp --production",
+    "dev": "gulp",
+    "watch": "gulp watch"
+  },
   "dependencies": {
     "bootstrap-sass": "^3.3.7",
     "gulp": "^3.9.1",
