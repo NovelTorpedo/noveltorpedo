@@ -19,6 +19,9 @@ django.setup()
 
 from noveltorpedo import models
 
+class TumblrNotFound(ValueError):
+    pass
+
 host = None
 client = pytumblr.TumblrRestClient(consumer_key, secret_key,
                                    oauth_token, oauth_secret)
@@ -52,7 +55,10 @@ def create_story(blog):
     try:
         storyhost = models.StoryHost.objects.get(url = blog + ".tumblr.com")
     except models.StoryHost.DoesNotExist:
-        blog_info = client.blog_info(blog)["blog"]
+        try:
+            blog_info = client.blog_info(blog)["blog"]
+        except KeyError:
+            raise TumblrNotFound(blog)
         story = models.Story()
         story.title = blog_info["title"]
         story.save()
@@ -80,7 +86,11 @@ def update_story(storyhost):
     oldest_new = datetime.now(utc)
     offset = 0
     posts = get_posts(storyhost.url)
-    post = posts.pop(0)
+    try:
+        post = posts.pop(0)
+    except IndexError:
+        # Blog has no text posts.
+        return
     post_date = datetime.fromtimestamp(post["timestamp"], utc)
     while post_date > storyhost.last_scraped:
         segment = models.StorySegment()
