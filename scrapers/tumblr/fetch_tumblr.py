@@ -70,16 +70,16 @@ def create_story(blog):
         storyhost.save()
     return storyhost
 
-def update_story(blog):
+def update_story(storyhost):
     """
     Retrieve any posts which have been added to a story since its last
     scraped timestamp. Assumes that the story is already in the database,
-    and there are text posts on the blog. Returns nothing.
+    and there are text posts on the blog. Takes a StoryHost object and
+    returns nothing.
     """
-    storyhost = models.StoryHost.objects.get(url = blog + ".tumblr.com")
     oldest_new = datetime.now(utc)
     offset = 0
-    posts = get_posts(blog)
+    posts = get_posts(storyhost.url)
     post = posts.pop(0)
     post_date = datetime.fromtimestamp(post["timestamp"], utc)
     while post_date > storyhost.last_scraped:
@@ -95,7 +95,7 @@ def update_story(blog):
         except IndexError:
             sleep(get_host().wait)
             offset = offset + MAX_POSTS
-            posts = get_posts(blog, offset)
+            posts = get_posts(storyhost.url, offset)
             if not posts:
                 break
             post = posts.pop(0)
@@ -119,10 +119,4 @@ if __name__ == "__main__":
     text posts to the database. Assumes the blog exists and has at least one
     text post.
     """
-    try:
-        blog = sys.argv[1]
-    except IndexError:
-        print("Please supply a tumblr name.")
-    else:
-        create_story(blog)
-        update_story(blog)
+    update_story(create_story(sys.argv[1]))
