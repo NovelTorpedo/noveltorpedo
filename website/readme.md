@@ -40,6 +40,7 @@ wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distrib
 sudo dpkg -i elasticsearch-2.4.4.deb
 rm -f elasticsearch-2.4.4.deb
 sudo systemctl enable elasticsearch.service
+sudo systemctl start elasticsearch
 ```
 
 ## Front-end Installation
