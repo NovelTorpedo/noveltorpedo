@@ -1,7 +1,8 @@
 import scrapy
-import time
+from datetime import datetime
 import sys
 import os
+import re
 from django.conf import settings
 from django.db import connection
 import django
@@ -38,9 +39,7 @@ class StorySpider(scrapy.Spider):
         response -- the response object used to navigate the page
 
         """
-        # insert while loop here later to scan THROUGH the threads
 
-        # ------
         current_page = response.xpath("//a[@class='currentPage ']/text()")
         print("current page: {0}".format(current_page.extract_first()))
 
@@ -81,15 +80,25 @@ class StorySpider(scrapy.Spider):
         li_tags = response.xpath("//li[@class='discussionListItem visible  ']")
 
         for thread_tag in li_tags:
-            story = Story()
-            story.author = thread_tag.xpath('@data-author').extract()
-            story.title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract()
+
+            # change this to make sure that an author+host is unique
+            author_name = thread_tag.xpath('@data-author').extract_first()
+            author, created = Author.objects.get_or_create(name=author_name)
+
+            author.save()
+            # print("\n\nauthor is {0}\n\n".format(author.name))
+
+            title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract_first().encode('utf-8')
+            story, created = Story.objects.get_or_create(title=title)
+            story.save()
+            story.authors.add(author)
 
             a_node = thread_tag.xpath("div/div/h3/a")
             thread_url = a_node.xpath("@href").extract_first()
 
-            print("\nauthors: {0}".format(author))
-            print(  "    url: {0}".format(thread_url))
+            # print("\nauthors: {0}".format(author.name))
+            # print(  "    url: {0}".format(thread_url))
+            # print(  "  title: {0}".format(story.title))
 
             if thread_url is not None:
 
@@ -106,31 +115,54 @@ class StorySpider(scrapy.Spider):
         This looks for any threadmarks, processes them, and
         follows the last threadmark's "next" link.
         If the page doesn't have any threadmarks, or there is
-        no next link, it gracefully closes.
+        no next link, it gracefully closes. It also creates story
+        segments, and links them to a story. (django models)
 
 
         Keyword arguments:
         response -- the response object used to navigate the page
 
+        META arguments:
+            story_item -- the story object to associate the
         """
-
+        story_item = response.meta.get("story_item")
         print("\nscraping thread {0}\n".format(response.url))
 
         div_tmarks = response.xpath("//li[contains(@class, 'hasThreadmark')]")
         
         if div_tmarks is not None and len(div_tmarks) > 0:
-            
+
             for div_tmark in div_tmarks:
+                story_seg = StorySegment()
+
                 author = div_tmark.xpath("@data-author").extract_first()
-                title = "".join(div_tmark.xpath("div/span/text()").extract())
+
+                author_seg, created = Author.objects.get_or_create(name=author)
+                story_item.authors.add(author_seg)
+
+                title = "".join(div_tmark.xpath("div/span/text()").extract()).encode('utf-8')
+                title = " ".join(title.split())
+                story_seg.title = title
+                story_seg.story = story_item
 
                 date_time = div_tmark.xpath(".//span[@class='DateTime']/@title").extract_first()
-                content = div_tmark.xpath(".//blockquote/text()").extract_first()
-                content = content.encode('utf-8')
+                if date_time is None:
+                    date_time = div_tmark.xpath(".//abbr[@class='DateTime']/text()").extract_first()
+                date_obj = datetime.strptime(date_time, "%b %d, %Y at %I:%M %p")
+                story_seg.published = date_obj
 
-                print("Title: {0}   Author: {1}".format(title, author))
-                print("date_time: {0}".format(date_time))
+                # TODO ^^ Convert date time to actual date_time type
+
+                content = div_tmark.xpath(".//blockquote/text()").extract_first().encode('utf-8')
+                content = " ".join(content.split())
                 print("content: {0}".format(content[0:200]))
+                story_seg.contents = content
+
+                print("Title: {0}   Author: {1}".format(story_seg.title, author))
+                print("date_time: {0}".format(date_obj))
+
+                story_seg.save()
+                story_item.save()
 
             div_next_tmark = div_tmarks[-1].xpath(".//span[@class='next']")
             
@@ -138,7 +170,12 @@ class StorySpider(scrapy.Spider):
                 next_mark = div_next_tmark.xpath("a/@href").extract_first() 
                 print("Next url: {0}".format(next_mark))
                 next_mark_url = response.urljoin(next_mark)
-                yield scrapy.Request(next_mark_url, callback=self.scan_thread, priority=2)
+                yield scrapy.Request(
+                    next_mark_url,
+                    callback=self.scan_thread,
+                    priority=2,
+                    meta={"story_item": story_item}
+                )
 
 
 
