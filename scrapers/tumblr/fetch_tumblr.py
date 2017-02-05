@@ -96,6 +96,15 @@ if __name__ == "__main__":
     import sys
     client = pytumblr.TumblrRestClient(consumer_key, secret_key, oauth_token,
                                        oauth_secret)
+if __name__ == "__main__":
+    """
+    This allows you to pass the short name of a tumblr on the command line to
+    verify that its information can be retrieved from the API. Examples:
+        antlerscolorado
+        docfuture
+    Also creates the Tumblr host entry in the database if it doesn't exist.
+    """
+    import sys
     try:
         blog = sys.argv[1]
         info = get_info(blog)
