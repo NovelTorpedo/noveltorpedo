@@ -155,11 +155,11 @@ class StorySpider(scrapy.Spider):
 
                 content = div_tmark.xpath(".//blockquote/text()").extract_first().encode('utf-8')
                 content = " ".join(content.split())
-                print("content: {0}".format(content[0:200]))
                 story_seg.contents = content
 
                 print("Title: {0}   Author: {1}".format(story_seg.title, author))
                 print("date_time: {0}".format(date_obj))
+                # print("content: {0}".format(content[0:200]))
 
                 story_seg.save()
                 story_item.save()
