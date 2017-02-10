@@ -79,8 +79,7 @@ def create_story(blog):
 def update_story(storyhost):
     """
     Retrieve any posts which have been added to a story since its last
-    scraped timestamp. Assumes that the story is already in the database,
-    and there are text posts on the blog. Takes a StoryHost object and
+    scraped timestamp. Takes a StoryHost object where the host is Tumblr, and
     returns nothing.
     """
     oldest_new = datetime.now(utc)
@@ -116,9 +115,10 @@ def update_story(storyhost):
 def get_posts(blog, offset=0, limit=MAX_POSTS):
     """
     Fetch post contents and metadata. Parameters:
+        blog (the short name of the blog)
         offset (how many posts back to begin)
         limit (how many posts to return; 20 is the max allowed by the API)
-    Returns a list of dictionaries.
+    Returns a list of dictionaries of post information.
     """
     return client.posts(blog, type="text", filter="text",
                         offset=offset, limit=limit)["posts"]
@@ -126,7 +126,9 @@ def get_posts(blog, offset=0, limit=MAX_POSTS):
 if __name__ == "__main__":
     """
     Takes the username of a tumblr account on the command line and adds its
-    text posts to the database. Assumes the blog exists and has at least one
-    text post.
+    text posts, if any, to the database.
     """
-    update_story(create_story(sys.argv[1]))
+    try:
+        update_story(create_story(sys.argv[1]))
+    except TumblrNotFound as e:
+        print("No such tumblr: " + str(e))
