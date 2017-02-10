@@ -11,7 +11,7 @@ pip install -r requirements.txt
 ```
 
 Start up elasticsearch and database.
-Instructions to set up back end and front end [here](../../../website)
+Instructions to set up back end and front end [here](../../website)
 
 Run scraper:
 ```
