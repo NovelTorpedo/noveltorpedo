@@ -3,6 +3,7 @@ from datetime import datetime
 import sys
 import os
 import re
+from pytz import utc
 from django.conf import settings
 from django.db import connection
 import django
@@ -46,15 +47,12 @@ class StorySpider(scrapy.Spider):
         next_page_link = response.xpath("//a[@class='text' and contains(., 'Next')]")
         next_page_link = next_page_link.xpath('@href').extract_first()
 
-        # urls_stories is a touple with a url, and a corresponding Story object
+        # urls_stories is a tuple with a url, and a corresponding Story object
         urls_stories = self.get_thread_urls(response)
 
         for (url, story) in urls_stories:
             yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
 
-        # yield scrapy.Request(urls[0], callback=self.scan_thread)
-        
-        # TODO: ADD CHECK HERE to only proceed when the thread_queue is empty!!!
         """
         if next_page_link is not None:
 
@@ -81,12 +79,10 @@ class StorySpider(scrapy.Spider):
 
         for thread_tag in li_tags:
 
-            # change this to make sure that an author+host is unique
             author_name = thread_tag.xpath('@data-author').extract_first()
             author, created = Author.objects.get_or_create(name=author_name)
 
             author.save()
-            # print("\n\nauthor is {0}\n\n".format(author.name))
 
             title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract_first().encode('utf-8')
             story, created = Story.objects.get_or_create(title=title)
@@ -96,15 +92,10 @@ class StorySpider(scrapy.Spider):
             a_node = thread_tag.xpath("div/div/h3/a")
             thread_url = a_node.xpath("@href").extract_first()
 
-            # print("\nauthors: {0}".format(author.name))
-            # print(  "    url: {0}".format(thread_url))
-            # print(  "  title: {0}".format(story.title))
-
             if thread_url is not None:
 
                 thread_link = response.urljoin(thread_url)
                 url_stories.append((thread_link, story))
-                # yield scrapy.Request(thread_link, callback=self.scan_thread)
 
         return url_stories
 
@@ -123,7 +114,7 @@ class StorySpider(scrapy.Spider):
         response -- the response object used to navigate the page
 
         META arguments:
-            story_item -- the story object to associate the
+            story_item -- the story object to associate the segments
         """
         story_item = response.meta.get("story_item")
         print("\nscraping thread {0}\n".format(response.url))
@@ -145,13 +136,14 @@ class StorySpider(scrapy.Spider):
                 story_seg.title = title
                 story_seg.story = story_item
 
+                # Get the Date and clean it up/format it ======================================
                 date_time = div_tmark.xpath(".//span[@class='DateTime']/@title").extract_first()
                 if date_time is None:
                     date_time = div_tmark.xpath(".//abbr[@class='DateTime']/text()").extract_first()
                 date_obj = datetime.strptime(date_time, "%b %d, %Y at %I:%M %p")
+                date_obj = date_obj.replace(tzinfo=utc)
                 story_seg.published = date_obj
-
-                # TODO ^^ Convert date time to actual date_time type
+                # =============================================================================
 
                 content = div_tmark.xpath(".//blockquote/text()").extract_first().encode('utf-8')
                 content = " ".join(content.split())
@@ -176,16 +168,3 @@ class StorySpider(scrapy.Spider):
                     priority=2,
                     meta={"story_item": story_item}
                 )
-
-
-
-
-            
-
-
-
-        
-
-
-
-
