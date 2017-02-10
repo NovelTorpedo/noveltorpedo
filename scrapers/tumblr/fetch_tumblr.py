@@ -1,12 +1,17 @@
 #!/usr/bin/python
 
+# For inserting well-formed TZ-aware post dates into the database.
 from datetime import datetime
 from pytz import utc
+
+# So we can pause between API calls, per Tumblr's robots.txt.
 from time import sleep
 
+# Library for API calls, and secondary file with authentication keys.
 import pytumblr
 from secrets import consumer_key, secret_key, oauth_token, oauth_secret
 
+# All of this is just so we can get and use the Django models for DB objects.
 import django
 from django.conf import settings
 from django.db import connection
@@ -19,15 +24,20 @@ django.setup()
 
 from noveltorpedo import models
 
+
 class TumblrNotFound(ValueError):
     pass
 
+
+# The host is a Host DB object which will be initialized later.
+# TODO: Do this here, once, with get_or_create() instead.
 host = None
 client = pytumblr.TumblrRestClient(consumer_key, secret_key,
                                    oauth_token, oauth_secret)
 
 # This is defined by Tumblr's API.
 MAX_POSTS = 20
+
 
 def get_host():
     """
@@ -53,6 +63,8 @@ def create_story(blog):
     returns the existing one.
     """
     try:
+        # Not using get_or_create() here, because if it doesn't exist, we
+        # have more work to do than just creating a single object.
         storyhost = models.StoryHost.objects.get(url = blog + ".tumblr.com")
     except models.StoryHost.DoesNotExist:
         try:
@@ -72,6 +84,8 @@ def create_story(blog):
         storyhost.host = get_host()
         storyhost.url = blog + ".tumblr.com"
         storyhost.story = story
+        # We initialize the last scraped time to the earliest time a datetime
+        # can store. This is easier to compare later than a null value.
         storyhost.last_scraped = datetime.min.replace(tzinfo=utc)
         storyhost.save()
     return storyhost
@@ -82,32 +96,42 @@ def update_story(storyhost):
     scraped timestamp. Takes a StoryHost object where the host is Tumblr, and
     returns nothing.
     """
-    oldest_new = datetime.now(utc)
+    # Start at the most recent post.
     offset = 0
     posts = get_posts(storyhost.url)
     try:
         post = posts.pop(0)
     except IndexError:
-        # Blog has no text posts.
+        # Blog has no text posts at all.
         return
     post_date = datetime.fromtimestamp(post["timestamp"], utc)
     while post_date > storyhost.last_scraped:
+        # Loop through posts, one at a time, as long as the current post we're
+        # examining is more recent than the last time we updated the story.
         segment = models.StorySegment()
         segment.story = storyhost.story
         segment.title = post["title"]
         segment.contents = post["body"]
-        segment.published = oldest_new
+        segment.published = post_date
         segment.save()
-        print segment
+        # TODO: Use an actual logger.
+        print(segment)
         try:
             post = posts.pop(0)
         except IndexError:
+            # No more posts remain from the last API call.
+            # Wait the amount of time that robots.txt requests, then
+            # make another call to get more posts.
             sleep(get_host().wait)
             offset = offset + MAX_POSTS
             posts = get_posts(storyhost.url, offset)
-            if not posts:
+            try:
+                post = posts.pop(0)
+            except IndexError:
+                # We got no posts from the new API call.
+                # That means we've run out of posts overall.
                 break
-            post = posts.pop(0)
+        # If we get back out here, we have a new post to loop on.
         post_date = datetime.fromtimestamp(post["timestamp"], utc)
     storyhost.last_scraped = datetime.now(utc)
     storyhost.save()
