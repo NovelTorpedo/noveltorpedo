@@ -3,6 +3,10 @@ before proceeding.
 
 Install python dependencies:
 ```
+pip install -r requirements_linux.txt
+```
+(Windows)
+```
 pip install -r requirements.txt
 ```
 
