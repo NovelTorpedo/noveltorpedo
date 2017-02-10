@@ -10,7 +10,8 @@ pip install -r requirements_linux.txt
 pip install -r requirements.txt
 ```
 
-Start up elasticsearch and database. (instructions in the website readme)
+Start up elasticsearch and database.
+Instructions to set up back end and front end [here](../../../website)
 
 Run scraper:
 ```
