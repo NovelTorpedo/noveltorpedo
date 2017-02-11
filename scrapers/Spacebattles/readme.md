@@ -15,7 +15,7 @@ Instructions to set up back end and front end [here](../../website)
 
 Run scraper:
 ```
-scrapy crawl stories
+scrapy crawl sb_spider
 ```
 
 
