@@ -96,12 +96,29 @@ class StorySpider(scrapy.Spider):
             thread_url = a_node.xpath("@href").extract_first()
 
             cur_date = datetime.now(tz=utc)
-            storyhost, created = StoryHost.objects.get_or_create(host=self.HOST,
-                                                        story=story,
-                                                        url=thread_url,
-                                                        last_scraped=cur_date)
 
-            storyhost.save()
+            """
+                Over here, I am attempting to either update an existing storyhost
+                object, OR I am creating a new one. It looks redundant, but I found that
+                if I just used get_or_create, I was forced to set last_date automatically.
+
+                I didn't always want to create a brand new object, so this verbose code
+                was necessary.
+            """
+            try:
+                # TRY TO UPDATE EXISTING object
+                storyhost = StoryHost.objects.get(host=self.HOST, story=story, url=thread_url)
+                storyhost.last_scraped = cur_date
+                storyhost.save()
+            except StoryHost.DoesNotExist:
+
+                # CREATE BRAND NEW STORYHOST OBJECT
+                storyhost, created = StoryHost.objects.get_or_create(host=self.HOST,
+                                                                     story=story,
+                                                                     url=thread_url,
+                                                                     last_scraped=cur_date)
+
+                storyhost.save()
 
             if thread_url is not None:
 
