@@ -1,22 +1,24 @@
 {% load highlight %}
 
-{% for result in page.object_list %}
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <a href="{{ result.object.get_absolute_url }}">
-                {{ result.object.title }}
-            </a>
-            <br />
-            by
-            {% for author in result.object.authors.all %}
-                {% if forloop.last and not forloop.first %}and{% endif %}
-                {{  author.name }}{% if forloop.revcounter > 2 %},{% endif %}
-            {% endfor %}
+<section id="searchPartialsResults">
+    {% for result in page.object_list %}
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <a href="{{ result.object.get_absolute_url }}">
+                    {{ result.object.title }}
+                </a>
+                <br />
+                by
+                {% for author in result.object.authors.all %}
+                    {% if forloop.last and not forloop.first %}and{% endif %}
+                    {{  author.name }}{% if forloop.revcounter > 2 %},{% endif %}
+                {% endfor %}
+            </div>
+            <div class="panel-body">
+                {% highlight result.text with query %}
+            </div>
         </div>
-        <div class="panel-body">
-            {% highlight result.text with query %}
-        </div>
-    </div>
-{% empty %}
-    <p>No results found.</p>
-{% endfor %}
+    {% empty %}
+        <p>No results found.</p>
+    {% endfor %}
+</section>
