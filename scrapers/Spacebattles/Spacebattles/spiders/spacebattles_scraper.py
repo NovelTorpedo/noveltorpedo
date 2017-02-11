@@ -18,11 +18,13 @@ from noveltorpedo.models import *
 
 
 class StorySpider(scrapy.Spider):
-    name = "stories"
+    name = "sb_spider"
     priority = 1
     host = "spacebattles.com"
 
     thread_queue = []
+
+    HOST = Host.objs.get_or_create(url="www.spacebattles.com", spider="sb_spider", wait=5)
 
     def start_requests(self):
         urls = [
