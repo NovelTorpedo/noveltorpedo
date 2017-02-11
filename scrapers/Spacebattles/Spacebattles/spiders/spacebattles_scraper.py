@@ -24,7 +24,8 @@ class StorySpider(scrapy.Spider):
 
     thread_queue = []
 
-    HOST = Host.objs.get_or_create(url="www.spacebattles.com", spider="sb_spider", wait=5)
+    HOST, created = Host.objects.get_or_create(url="www.spacebattles.com", spider="sb_spider", wait=5)
+    HOST.save()
 
     def start_requests(self):
         urls = [
@@ -93,6 +94,14 @@ class StorySpider(scrapy.Spider):
 
             a_node = thread_tag.xpath("div/div/h3/a")
             thread_url = a_node.xpath("@href").extract_first()
+
+            cur_date = datetime.now(tz=utc)
+            storyhost, created = StoryHost.objects.get_or_create(host=self.HOST,
+                                                        story=story,
+                                                        url=thread_url,
+                                                        last_scraped=cur_date)
+
+            storyhost.save()
 
             if thread_url is not None:
 
