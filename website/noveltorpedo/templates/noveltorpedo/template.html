@@ -1,4 +1,4 @@
-{% load static %}
+{% load version %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
     <title>NovelTorpedo | {% block title %}{% endblock %}</title>
 
-    <link rel="stylesheet" href="{% static 'app.css' %}">
+    <link rel="stylesheet" href="{% version 'app.css' %}">
 </head>
 <body>
     {% include 'noveltorpedo/partials/header.html' %}
@@ -14,6 +14,6 @@
         {% block content %}{% endblock %}
     </div>
     <section id="footer"></section>
-    <script src="{% static 'app.js' %}"></script>
+    <script src="{% version 'app.js' %}"></script>
 </body>
 </html>
