@@ -37,11 +37,23 @@ client = pytumblr.TumblrRestClient(consumer_key, secret_key,
 MAX_POSTS = 20
 
 
-def create_story(blog):
-    """
-    Add a new story to the database. Takes a Tumblr blog name and returns
-    the corresponding StoryHost object. If it was already in the database,
-    returns the existing one.
+def get_or_create_storyhost(blog):
+    """Finds the StoryHost for a Tumblr blog, creating it if necessary.
+
+    Either fetches the StoryHost corresponding to the given Tumblr username
+    or creates it, initializing appropriate author and story rows at the same
+    time. Doesn't currently handle the case where the blog has been added and
+    then deleted, so could conceivably return a database entry for a blog
+    that no longer exists.
+
+    Args:
+        blog: The username of a Tumblr blog (e.g. "litrocket-test").
+
+    Returns:
+        A StoryHost object corresponding to the given blog.
+
+    Raises:
+        TumblrNotFound: If there is no such blog and no existing StoryHost.
     """
     try:
         # Not using get_or_create() here, because if it doesn't exist, we
@@ -76,7 +88,7 @@ def update_continuously(idle_time=10, minimum_delay=10):
 
     Specifically, finds the Tumblr StoryHost which is least recently updated,
     and if that update is longer ago than the minimum delay, checks it for new
-    posts.
+    posts. Then repeats.
 
     Args:
         idle_time: Time, in seconds, to sleep when there's nothing to do.
@@ -100,10 +112,15 @@ def update_continuously(idle_time=10, minimum_delay=10):
         update_story(storyhost)
 
 def update_story(storyhost):
-    """
-    Retrieve any posts which have been added to a story since its last
-    scraped timestamp. Takes a StoryHost object where the host is Tumblr, and
-    returns nothing.
+    """Fetches updates to the story corresponding to the given StoryHost.
+
+    Makes one or more calls to the Tumblr API, adding segment entries for any
+    posts which were published more recently than the last_updated value for
+    the StoryHost. Will not currently notice posts that are backdated,
+    deleted, or edited. Returns nothing.
+
+    Args:
+        storyhost: an existing StoryHost object.
     """
     # Start at the most recent post.
     offset = 0
@@ -148,26 +165,47 @@ def update_story(storyhost):
     storyhost.save()
 
 def get_posts(blog, offset=0, limit=MAX_POSTS):
-    """
-    Fetch post contents and metadata. Parameters:
-        blog (the short name of the blog)
-        offset (how many posts back to begin)
-        limit (how many posts to return; 20 is the max allowed by the API)
-    Returns a list of dictionaries of post information.
+    """Retrieves some text posts by the given account from the Tumblr API.
+
+    Makes one call to the Tumblr API, requesting posts with the given
+    parameters. Only asks for text posts, in the format that the user entered
+    them (which may include HTML or Markdown, but needn't).
+
+    Args:
+        blog: The username of a Tumblr blog (e.g. "litrocket-test").
+        offset: How many posts back from the most recent one to begin.
+        limit: How many total posts to retrieve (bounded by the maximum
+            defined by the API).
+
+    Returns:
+        A list of dictionaries, each one corresponding to a post, in
+        descending order by publication timestamp. Relevant keys include
+        "timestamp" (publication time in seconds since the epoch in UTC),
+        "title", and "body".
     """
     return client.posts(blog, type="text", filter="text",
                         offset=offset, limit=limit)["posts"]
 
 if __name__ == "__main__":
-    """
-    Takes the username of a tumblr account on the command line and adds the
-    corresponding story entry to the database, iff the account exists.
+    """Add a Tumblr blog to the database, or start the update loop.
 
-    If no username is supplied, instead enters a loop of updating the least
-    recently updated Tumblr stories in the database.
+    If a username is given, attempts to add appropriate entries to the
+    database (story, storyhost, and author) for that Tumblr account. Will
+    not add it if those entries already exist, or if there is no such blog,
+    but also won't notice if those entries already exist but the blog does
+    not any more.
+
+    With no arguments, will just start an infinite loop of checking for
+    updates to the stories already recorded in the database. (Adding new
+    stories while it's going, by running another instance with an argument
+    or calling the get_or_create_storyhost() function from elsewhere, works
+    and is the intended use case.)
+
+    Command Line Args:
+        (optional) The username of a Tumblr account (e.g. "litrocket-test").
     """
     try:
-        create_story(sys.argv[1])
+        get_or_create_storyhost(sys.argv[1])
     except TumblrNotFound as e:
         print("No such tumblr: " + str(e))
     except IndexError:
