@@ -60,14 +60,14 @@ class Command(BaseCommand):
 
         # Create 20 random authors.
         authors = []
-        for _ in range(20):
+        for _ in range(100):
             author = Author()
             author.name = random_name()
             author.save()
             authors.append(author)
 
         # Create 20 random stories.
-        for _ in range(20):
+        for _ in range(100):
             story = Story()
             story.title = random_sentence()
             story.save()
