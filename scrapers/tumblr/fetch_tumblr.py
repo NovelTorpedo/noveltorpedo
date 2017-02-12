@@ -7,6 +7,9 @@ from pytz import utc
 # So we can pause between API calls, per Tumblr's robots.txt.
 from time import sleep
 
+# For proper log message handling.
+import logging
+
 # Library for API calls, and secondary file with authentication keys.
 import pytumblr
 from secrets import consumer_key, secret_key, oauth_token, oauth_secret
@@ -29,13 +32,19 @@ class TumblrNotFound(ValueError):
     pass
 
 
+# This is defined by Tumblr's API.
+MAX_POSTS = 20
+
+# Grab the Host object from the database and a client for connecting to the
+# Tumblr API, since we'll need these in a couple of places.
 tumblr = models.Host.objects.get_or_create(url="tumblr.com", spider="scrapers/tumblr/fetch_tumblr.py", wait=1)[0]
 client = pytumblr.TumblrRestClient(consumer_key, secret_key,
                                    oauth_token, oauth_secret)
 
-# This is defined by Tumblr's API.
-MAX_POSTS = 20
-
+# Initialize the logger with basic stream output.
+logger = logging.getLogger(__name__)
+logger.addHandler(logging.StreamHandler())
+logger.setLevel(logging.DEBUG)
 
 def get_or_create_storyhost(blog):
     """Finds the StoryHost for a Tumblr blog, creating it if necessary.
@@ -95,20 +104,20 @@ def update_continuously(idle_time=10, minimum_delay=10):
         minimum_delay: Minimum time, in seconds, to wait before requesting
             updates to the same blog again.
     """
-    print("Entering continuous update loop.")
+    logger.info("Entering continuous update loop.")
     while True:
         try:
             storyhost = models.StoryHost.objects.filter(host=tumblr).earliest("last_scraped")
         except models.StoryHost.DoesNotExist:
-            print("No storyhosts found. Idling for {0} seconds.".format(idle_time))
+            logger.debug("No storyhosts found. Idling for {0} seconds.".format(idle_time))
             sleep(idle_time)
             continue
         if datetime.now(utc) - storyhost.last_scraped < timedelta(seconds=minimum_delay):
-            print("Least recent storyhost update is less than {0} seconds "
-                  "old. Idling for {1} seconds.".format(minimum_delay, idle_time))
+            logger.debug("Least recent storyhost update is less than {0} "
+                         "seconds old. Idling for {1} seconds.".format(minimum_delay, idle_time))
             sleep(idle_time)
             continue
-        print("Checking for updates to {0}.".format(storyhost.story))
+        logger.debug("Checking for updates to {0}.".format(storyhost.story))
         update_story(storyhost)
 
 def update_story(storyhost):
@@ -142,8 +151,7 @@ def update_story(storyhost):
         segment.contents = post["body"]
         segment.published = post_date
         segment.save()
-        # TODO: Use an actual logger.
-        print("Adding segment: " + str(segment))
+        logger.debug("Adding segment: " + str(segment))
         try:
             post = posts.pop(0)
         except IndexError:
@@ -207,6 +215,6 @@ if __name__ == "__main__":
     try:
         get_or_create_storyhost(sys.argv[1])
     except TumblrNotFound as e:
-        print("No such tumblr: " + str(e))
+        logger.error("No such tumblr: " + str(e))
     except IndexError:
         update_continuously()
