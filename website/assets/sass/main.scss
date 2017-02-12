@@ -1,2 +1,9 @@
-@import "bootstrap";
-@import "global";
+// Load our global variables.
+@import "variables";
+
+// Load the bootstrap framework.
+@import "bootstrap/bootstrap";
+
+// Load all template-specific styles.
+@import "noveltorpedo/partials/header";
+@import "search/partials/results";

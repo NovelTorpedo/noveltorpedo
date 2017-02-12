@@ -9,8 +9,8 @@
     * [JavaScript](#javascript)
     * [Sass / CSS](#sass--css)
 
-***NOTE:***  Ensure you are in the `website` directory when executing the website development
-commands throughout this documentation.
+***NOTE:***  Ensure you are in the `website` directory when executing the
+website development commands throughout this documentation.
 
 ## Back-end Installation
 
@@ -40,7 +40,11 @@ wget https://download.elastic.co/elasticsearch/release/org/elasticsearch/distrib
 sudo dpkg -i elasticsearch-2.4.4.deb
 rm -f elasticsearch-2.4.4.deb
 sudo systemctl enable elasticsearch.service
+sudo systemctl start elasticsearch
 ```
+
+If you do not need to use the website's front-end, you may now skip to
+[Database / Search Index Schema Installation](#database--search-index-schema-installation).
 
 ## Front-end Installation
 
@@ -57,7 +61,8 @@ Install [gulp](http://gulpjs.com/) globally:
 sudo yarn global add gulp
 ```
 
-Install the front-end packages via yarn (this will resolve packages using the `yarn.lock` file):
+Install the front-end packages via yarn (this will resolve packages using the
+`yarn.lock` file):
 ```bash
 yarn
 ```
@@ -130,7 +135,8 @@ The file `gulpfile.js` defines all of our front-end build (gulp) configurations.
 
 All JavaScript should be written in [ECMAScript 6](http://es6-features.org/).
 
-For cleanliness and ease-of-use, *all* JavaScript is loaded/defined in `assets/js/main.js`.
+For cleanliness and ease-of-use, *all* JavaScript is loaded/defined in
+`assets/js/main.js`.
 
 That file looks like this:
 ```javascript
@@ -141,10 +147,11 @@ $(function() {
 });
 ```
 
-Feel free to create other JavaScript files and load them through `assets/js/bootstrap.js`.
+Feel free to create other JavaScript files and load them through
+`assets/js/bootstrap.js`.
 
-For instance, if you create the file `assets/js/my-javascript-file.js`, you can alter the bootstrap
-file to load your JavaScript like so (note the added line):
+For instance, if you create the file `assets/js/my-javascript-file.js`, you can
+alter the bootstrap file to load your JavaScript like so (note the added line):
 
 ```javascript
 window._ = require('lodash');
@@ -155,15 +162,16 @@ require('./my-javascript-file'); // <-- Added this line.
 
 ### Sass / CSS
 
-Similarly to JavaScript, *all* Sass/CSS is loaded through `assets/sass/main.scss`.
+Similarly to JavaScript, *all* Sass/CSS is loaded through
+`assets/sass/main.scss`.
 
 Global CSS should be placed in `assets/sass/_global.scss`.
 
-Feel free to create as many other scss files as you'd like, ensuring to prepend them with an underscore
-and load them in `assets/sass/main.scss`.
+Feel free to create as many other scss files as you'd like, ensuring to prepend
+them with an underscore and load them in `assets/sass/main.scss`.
 
-For instance, if you create the file `assets/sass/_my-sass-file.scss`, you can alter
-`assets/sass/main.scss` like so (note the added line):
+For instance, if you create the file `assets/sass/_my-sass-file.scss`, you can
+alter `assets/sass/main.scss` like so (note the added line):
 ```sass
 @import "bootstrap";
 @import "global";
