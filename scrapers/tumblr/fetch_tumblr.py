@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # For inserting well-formed TZ-aware post dates into the database.
-from datetime import datetime
+from datetime import datetime, timedelta
 from pytz import utc
 
 # So we can pause between API calls, per Tumblr's robots.txt.
@@ -90,6 +90,34 @@ def create_story(blog):
         storyhost.save()
     return storyhost
 
+def update_continuously(idle_time=10, minimum_delay=10):
+    """Loops indefinitely, updating the database with new posts to Tumblr blogs.
+
+    Specifically, finds the Tumblr StoryHost which is least recently updated,
+    and if that update is longer ago than the minimum delay, checks it for new
+    posts.
+
+    Args:
+        idle_time: Time, in seconds, to sleep when there's nothing to do.
+        minimum_delay: Minimum time, in seconds, to wait before requesting
+            updates to the same blog again.
+    """
+    print("Entering continuous update loop.")
+    while True:
+        try:
+            storyhost = models.StoryHost.objects.filter(host=get_host()).earliest("last_scraped")
+        except models.StoryHost.DoesNotExist:
+            print("No storyhosts found. Idling for {0} seconds.".format(idle_time))
+            sleep(idle_time)
+            continue
+        if datetime.now(utc) - storyhost.last_scraped < timedelta(seconds=minimum_delay):
+            print("Least recent storyhost update is less than {0} seconds "
+                  "old. Idling for {1} seconds.".format(minimum_delay, idle_time))
+            sleep(idle_time)
+            continue
+        print("Checking for updates to {0}.".format(storyhost.story))
+        update_story(storyhost)
+
 def update_story(storyhost):
     """
     Retrieve any posts which have been added to a story since its last
@@ -103,8 +131,10 @@ def update_story(storyhost):
         post = posts.pop(0)
     except IndexError:
         # Blog has no text posts at all.
-        return
-    post_date = datetime.fromtimestamp(post["timestamp"], utc)
+        # Set this in a way that will skip the update loop.
+        post_date = storyhost.last_scraped
+    else:
+        post_date = datetime.fromtimestamp(post["timestamp"], utc)
     while post_date > storyhost.last_scraped:
         # Loop through posts, one at a time, as long as the current post we're
         # examining is more recent than the last time we updated the story.
@@ -115,7 +145,7 @@ def update_story(storyhost):
         segment.published = post_date
         segment.save()
         # TODO: Use an actual logger.
-        print(segment)
+        print("Adding segment: " + segment)
         try:
             post = posts.pop(0)
         except IndexError:
@@ -149,10 +179,15 @@ def get_posts(blog, offset=0, limit=MAX_POSTS):
 
 if __name__ == "__main__":
     """
-    Takes the username of a tumblr account on the command line and adds its
-    text posts, if any, to the database.
+    Takes the username of a tumblr account on the command line and adds the
+    corresponding story entry to the database, iff the account exists.
+
+    If no username is supplied, instead enters a loop of updating the least
+    recently updated Tumblr stories in the database.
     """
     try:
-        update_story(create_story(sys.argv[1]))
+        create_story(sys.argv[1])
     except TumblrNotFound as e:
         print("No such tumblr: " + str(e))
+    except IndexError:
+        update_continuously()
