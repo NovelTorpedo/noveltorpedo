@@ -29,32 +29,13 @@ class TumblrNotFound(ValueError):
     pass
 
 
-# The host is a Host DB object which will be initialized later.
-# TODO: Do this here, once, with get_or_create() instead.
-host = None
+tumblr = models.Host.objects.get_or_create(url="tumblr.com", spider="scrapers/tumblr/fetch_tumblr.py", wait=1)[0]
 client = pytumblr.TumblrRestClient(consumer_key, secret_key,
                                    oauth_token, oauth_secret)
 
 # This is defined by Tumblr's API.
 MAX_POSTS = 20
 
-
-def get_host():
-    """
-    Retrieves the Tumblr host entry from the database, creating it first if it
-    didn't already exist and caching it if it did. Returns a Host object.
-    """
-    global host
-    if not host:
-        try:
-            host = models.Host.objects.get(url = "tumblr.com")
-        except models.Host.DoesNotExist:
-            host = models.Host()
-            host.url = "tumblr.com"
-            host.spider = "scrapers/tumblr/fetch_tumblr.py"
-            host.wait = 1 # per their robots.txt
-            host.save()
-    return host
 
 def create_story(blog):
     """
@@ -81,7 +62,7 @@ def create_story(blog):
         story.authors.add(author)
 
         storyhost = models.StoryHost()
-        storyhost.host = get_host()
+        storyhost.host = tumblr
         storyhost.url = blog + ".tumblr.com"
         storyhost.story = story
         # We initialize the last scraped time to the earliest time a datetime
@@ -105,7 +86,7 @@ def update_continuously(idle_time=10, minimum_delay=10):
     print("Entering continuous update loop.")
     while True:
         try:
-            storyhost = models.StoryHost.objects.filter(host=get_host()).earliest("last_scraped")
+            storyhost = models.StoryHost.objects.filter(host=tumblr).earliest("last_scraped")
         except models.StoryHost.DoesNotExist:
             print("No storyhosts found. Idling for {0} seconds.".format(idle_time))
             sleep(idle_time)
@@ -145,14 +126,14 @@ def update_story(storyhost):
         segment.published = post_date
         segment.save()
         # TODO: Use an actual logger.
-        print("Adding segment: " + segment)
+        print("Adding segment: " + str(segment))
         try:
             post = posts.pop(0)
         except IndexError:
             # No more posts remain from the last API call.
             # Wait the amount of time that robots.txt requests, then
             # make another call to get more posts.
-            sleep(get_host().wait)
+            sleep(tumblr.wait)
             offset = offset + MAX_POSTS
             posts = get_posts(storyhost.url, offset)
             try:
