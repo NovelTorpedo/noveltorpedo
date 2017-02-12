@@ -37,7 +37,10 @@ MAX_POSTS = 20
 
 # Grab the Host object from the database and a client for connecting to the
 # Tumblr API, since we'll need these in a couple of places.
-tumblr = models.Host.objects.get_or_create(url="tumblr.com", spider="scrapers/tumblr/fetch_tumblr.py", wait=1)[0]
+host_attrs = {"url": "tumblr.com",
+              "spider": "tumblr/fetch_tumblr.py",
+              "wait": 1}
+tumblr = models.Host.objects.get_or_create(**host_attrs)[0]
 client = pytumblr.TumblrRestClient(consumer_key, secret_key,
                                    oauth_token, oauth_secret)
 
@@ -67,7 +70,7 @@ def get_or_create_storyhost(blog):
     try:
         # Not using get_or_create() here, because if it doesn't exist, we
         # have more work to do than just creating a single object.
-        storyhost = models.StoryHost.objects.get(url = blog + ".tumblr.com")
+        storyhost = models.StoryHost.objects.get(url=blog+".tumblr.com")
     except models.StoryHost.DoesNotExist:
         try:
             blog_info = client.blog_info(blog)["blog"]
@@ -107,17 +110,21 @@ def update_continuously(idle_time=10, minimum_delay=10):
     logger.info("Entering continuous update loop.")
     while True:
         try:
-            storyhost = models.StoryHost.objects.filter(host=tumblr).earliest("last_scraped")
+            sh_manager = models.StoryHost.objects
+            storyhost = sh_manager.filter(host=tumblr).earliest("last_scraped")
         except models.StoryHost.DoesNotExist:
-            logger.debug("No storyhosts found. Idling for {0} seconds.".format(idle_time))
+            logger.debug("No storyhosts found. Idling for %s seconds.",
+                         idle_time)
             sleep(idle_time)
             continue
-        if datetime.now(utc) - storyhost.last_scraped < timedelta(seconds=minimum_delay):
-            logger.debug("Least recent storyhost update is less than {0} "
-                         "seconds old. Idling for {1} seconds.".format(minimum_delay, idle_time))
+        if (datetime.now(utc) - storyhost.last_scraped
+                < timedelta(seconds=minimum_delay)):
+            logger.debug("Least recent storyhost update is less than %s "
+                         "seconds old. Idling for %s seconds.",
+                         minimum_delay, idle_time)
             sleep(idle_time)
             continue
-        logger.debug("Checking for updates to {0}.".format(storyhost.story))
+        logger.debug("Checking for updates to %s.", storyhost.story)
         update_story(storyhost)
 
 def update_story(storyhost):
