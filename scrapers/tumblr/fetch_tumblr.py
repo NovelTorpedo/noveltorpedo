@@ -80,6 +80,13 @@ def get_or_create_storyhost(blog):
         story.title = blog_info["title"]
         story.save()
 
+        if blog_info["is_nsfw"]:
+            nsfw = models.StoryAttribute()
+            nsfw.story = story
+            nsfw.key = "nsfw"
+            nsfw.value = "TRUE"
+            nsfw.save()
+
         author = models.Author()
         author.name = blog
         author.save()
