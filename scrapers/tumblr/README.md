@@ -6,11 +6,11 @@ new posts are added.
 ## Setup and Configuration
 
 Follow the instructions to install at least the backend of the
-[website](../../website) and set up the database. Then, install the Tumblr
-API library:
+[website](../../website) and set up the database. Then, install the
+requirements.
 
 ```bash
-pip install pytumblr
+pip install requirements.txt
 ```
 
 To authenticate with Tumblr and receive data from the API, you'll need an
