@@ -14,6 +14,15 @@ website development commands throughout this documentation.
 
 ## Back-end Installation
 
+Prerequisites:
+ - Java 8
+ - Node.js with working `node` command.
+
+If `node --version` doesn't work, you may just need to:
+```
+sudo ln -s /usr/bin/nodejs /usr/bin/node
+```
+
 Install Python dependencies:
 ```bash
 sudo apt update
@@ -23,6 +32,7 @@ sudo apt install python3-yaml               # 3.11-3build1
 sudo apt install python3-psycopg2           # 2.6.1-1build2
 sudo apt install python3-pip
 sudo pip3 install django-haystack           # Latest (since apt `python3-django-haystack` is out-of-date)
+sudo pip3 install pytz
 ```
 
 Install PostgreSQL and create database:
