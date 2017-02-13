@@ -10,7 +10,7 @@ Follow the instructions to install at least the backend of the
 requirements.
 
 ```bash
-pip install requirements.txt
+pip install -r requirements.txt
 ```
 
 To authenticate with Tumblr and receive data from the API, you'll need an
