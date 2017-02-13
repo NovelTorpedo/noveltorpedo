@@ -1,16 +1,14 @@
 [![Software License](https://img.shields.io/badge/license-MIT-brightgreen.svg)](http://opensource.org/licenses/MIT)
 [![Build Status](https://travis-ci.org/NovelTorpedo/noveltorpedo.svg?branch=master)](https://travis-ci.org/NovelTorpedo/noveltorpedo)
 
-# NovelTorpedo
-
-https://github.com/NovelTorpedo/noveltorpedo
+# [NovelTorpedo](https://github.com/NovelTorpedo/noveltorpedo)
 
 (c) 2017 Brook Boese, Finn Ellis, Jacob Martin, Matthew Popescu,
 Rubin Stricklin, and Sage Callon.
 
 NovelTorpedo is web-based searchable database of online serial fiction. Unlike
 the many websites which directly host stories, NovelTorpedo follows in the
-footsteps of [ComicRocket](http://www.comicrocket.com) as a host-agnostic
+footsteps of [ComicRocket](http://www.comic-rocket.com) as a host-agnostic
 index of works which are already being published elsewhere. Authors and
 readers can suggest new works to be tracked, and developers can add new
 scrapers (or API consumers) to make more hosts available for indexing. We
