@@ -14,6 +14,7 @@ ipaddress==1.0.18
 lxml==3.7.2
 packaging==16.8
 parsel==1.1.0
+pkg-resources==0.0.0
 psycopg2==2.6.2
 pyasn1==0.2.2
 pyasn1-modules==0.0.8
@@ -21,6 +22,7 @@ pycparser==2.17
 PyDispatcher==2.0.5
 pyOpenSSL==16.2.0
 pyparsing==2.1.10
+pytz==2016.10
 queuelib==1.4.2
 Scrapy==1.3.0
 service-identity==16.0.0
