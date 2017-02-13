@@ -18,11 +18,10 @@ Prerequisites:
  - Java 8
  - Node.js with working `node` command.
 
-(If `node --version` doesn't work, you may just need to):
+If `node --version` doesn't work, you may just need to:
 ```
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 ```
-
 
 Install Python dependencies:
 ```bash
