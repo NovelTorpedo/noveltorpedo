@@ -24,6 +24,7 @@ class StorySpider(scrapy.Spider):
 
     thread_queue = []
 
+    # try to get the host object for this Host. Create if not found.
     HOST, created = Host.objects.get_or_create(url="www.spacebattles.com", spider="sb_spider", wait=5)
     HOST.save()
 
@@ -43,6 +44,10 @@ class StorySpider(scrapy.Spider):
         response -- the response object used to navigate the page
 
         """
+
+        # asynchronously try and update any stories...
+        # self.update_stories(response)
+        # return
 
         current_page = response.xpath("//a[@class='currentPage ']/text()")
         print("current page: {0}".format(current_page.extract_first()))
@@ -83,19 +88,30 @@ class StorySpider(scrapy.Spider):
         for thread_tag in li_tags:
 
             author_name = thread_tag.xpath('@data-author').extract_first()
-            author, created = Author.objects.get_or_create(name=author_name)
 
-            author.save()
+            # Get the last post date for a thread ========================================================
+            last_post_date = thread_tag.xpath(".//dl[@class='lastPostInfo']//abbr/text()").extract_first()
+            if last_post_date is not None:
+                date_obj = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p")
+                last_post_date = date_obj.replace(tzinfo=utc)
+            # ============================================================================================
+
+            author, created = Author.objects.get_or_create(name=author_name)
+            if created:
+                author.save()
 
             title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract_first().encode('utf-8')
             story, created = Story.objects.get_or_create(title=title)
-            story.save()
+            if created:
+                story.save()
             story.authors.add(author)
 
             a_node = thread_tag.xpath("div/div/h3/a")
             thread_url = a_node.xpath("@href").extract_first()
 
             cur_date = datetime.now(tz=utc)
+            oldest_date = datetime.min
+            oldest_date = oldest_date.replace(tzinfo=utc)
 
             """
                 Over here, I am attempting to either update an existing storyhost
@@ -108,7 +124,6 @@ class StorySpider(scrapy.Spider):
             try:
                 # TRY TO UPDATE EXISTING object
                 storyhost = StoryHost.objects.get(host=self.HOST, story=story, url=thread_url)
-                storyhost.last_scraped = cur_date
                 storyhost.save()
             except StoryHost.DoesNotExist:
 
@@ -116,14 +131,25 @@ class StorySpider(scrapy.Spider):
                 storyhost, created = StoryHost.objects.get_or_create(host=self.HOST,
                                                                      story=story,
                                                                      url=thread_url,
-                                                                     last_scraped=cur_date)
+                                                                     last_scraped=oldest_date)
 
                 storyhost.save()
 
-            if thread_url is not None:
+            """
+                Check if the last post date is more recent than the
+                storyhost's last scraped date. If it's not, skip it.
 
-                thread_link = response.urljoin(thread_url)
-                url_stories.append((thread_link, story))
+                If it is, update the last scraped date, and add it to the
+                list of url_stories to be returned at the end of this function.
+            """
+            if thread_url is not None:
+                if last_post_date > storyhost.last_scraped:
+                    storyhost.last_scraped = cur_date
+                    storyhost.save()
+                    thread_link = response.urljoin(thread_url)
+                    url_stories.append((thread_link, story))
+                else:
+                    print("Skipping {0}".format(storyhost.url))
 
         return url_stories
 
@@ -196,3 +222,30 @@ class StorySpider(scrapy.Spider):
                     priority=2,
                     meta={"story_item": story_item}
                 )
+
+    def update_stories(self, response):
+        """ Attempt to update all stories indexed in the database
+
+        Makes queryset of all story objects, gets the storyhosts and segments,
+        checks if the last segment available is older than the 'last scraped'
+        field in the storyhost.
+
+        :param self:
+        :param response:
+        :return:
+        """
+        story_hosts = []
+        indexed_stories = Story.objects.all()
+
+        for story in indexed_stories:
+            try:
+                story_host = StoryHost.objects.get(story=story, host=self.HOST)
+                story_hosts.append(story_host)
+                print("Updating story: {0}".format(story.title.encode('utf-8')))
+
+            except django.core.exceptions.ObjectDoesNotExist:
+                print("Couldn't find story: {0}".format(story.title.encode('utf-8')))
+
+
+
+
