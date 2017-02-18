@@ -142,6 +142,8 @@ class StorySpider(scrapy.Spider):
                 If it is, update the last scraped date, and add it to the
                 list of url_stories to be returned at the end of this function.
             """
+
+            last_seg_date = self.get_last_seg_date(story)
             if thread_url is not None:
                 if last_post_date > storyhost.last_scraped:
                     storyhost.last_scraped = cur_date
@@ -199,13 +201,14 @@ class StorySpider(scrapy.Spider):
                 story_seg.published = date_obj
                 # =============================================================================
 
-                content = div_tmark.xpath(".//blockquote/text()").extract_first().encode('utf-8')
-                content = " ".join(content.split())
+                # If you want to include the formatting of the original page, change the following
+                # line to ..... .//blockquote/node()").extract()
+                content = "".join(div_tmark.xpath(".//blockquote//text()").extract())
                 story_seg.contents = content
 
                 print("Title: {0}   Author: {1}".format(story_seg.title, author))
                 print("date_time: {0}".format(date_obj))
-                # print("content: {0}".format(content[0:200]))
+                print("content length: {0}".format(len(content)))
 
                 story_seg.save()
                 story_item.save()
@@ -246,6 +249,22 @@ class StorySpider(scrapy.Spider):
             except django.core.exceptions.ObjectDoesNotExist:
                 print("Couldn't find story: {0}".format(story.title.encode('utf-8')))
 
+    def get_last_seg_date(self, story):
+        """ return the datetime object of the last segment in this story.
 
+        will query the database for the last published story segment of <story>
+        and return the datetime value for <published>
 
+        :param story:
+        :return: datetime object
+        """
+
+        # retrieve the LAST story segment (ordered by published date)
+        try:
+            story_segs = StorySegment.objects.filter(story=story).order_by("published").reverse()[0]
+            print ("lastdate for {0}: {1}".format(story.title, story_segs.published))
+            return story_segs.published
+        except IndexError:
+            print(" no lastdate found for story [{0}]".format(story.title))
+            return None
 
