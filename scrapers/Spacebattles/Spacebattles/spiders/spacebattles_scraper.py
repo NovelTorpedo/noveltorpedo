@@ -22,7 +22,8 @@ class StorySpider(scrapy.Spider):
     priority = 1
     host = "spacebattles.com"
 
-    thread_queue = []
+    # this will be a queue of tuples (of story objects and urls)
+    update_list = []
 
     # try to get the host object for this Host. Create if not found.
     HOST, created = Host.objects.get_or_create(url="www.spacebattles.com", spider="sb_spider", wait=5)
@@ -61,6 +62,8 @@ class StorySpider(scrapy.Spider):
         for (url, story) in urls_stories:
             yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
 
+        for (url, story) in self.update_list:
+            yield scrapy.Request(url, callback=self.update_stories, priority=5, meta={"story_item": story})
         """
         if next_page_link is not None:
 
@@ -113,6 +116,7 @@ class StorySpider(scrapy.Spider):
             oldest_date = datetime.min
             oldest_date = oldest_date.replace(tzinfo=utc)
 
+            created = False
             """
                 Over here, I am attempting to either update an existing storyhost
                 object, OR I am creating a new one. It looks redundant, but I found that
@@ -145,11 +149,17 @@ class StorySpider(scrapy.Spider):
 
             last_seg_date = self.get_last_seg_date(story)
             if thread_url is not None:
-                if last_post_date > storyhost.last_scraped:
+                if last_seg_date > storyhost.last_scraped:
                     storyhost.last_scraped = cur_date
                     storyhost.save()
                     thread_link = response.urljoin(thread_url)
-                    url_stories.append((thread_link, story))
+
+                    # Add this story to two separate lists, one for updating, one for just
+                    # scraping.
+                    if created:
+                        url_stories.append((thread_link, story))
+                    else:
+                        self.update_list.append(("{0}/threadmarks".format(thread_link), story))
                 else:
                     print("Skipping {0}".format(storyhost.url))
 
@@ -180,7 +190,7 @@ class StorySpider(scrapy.Spider):
         if div_tmarks is not None and len(div_tmarks) > 0:
 
             for div_tmark in div_tmarks:
-                story_seg = StorySegment()
+                # story_seg = StorySegment()
 
                 author = div_tmark.xpath("@data-author").extract_first()
 
@@ -189,8 +199,8 @@ class StorySpider(scrapy.Spider):
 
                 title = "".join(div_tmark.xpath("div/span/text()").extract()).encode('utf-8')
                 title = " ".join(title.split())
-                story_seg.title = title
-                story_seg.story = story_item
+                # story_seg.title = title
+                # story_seg.story = story_item
 
                 # Get the Date and clean it up/format it ======================================
                 date_time = div_tmark.xpath(".//span[@class='DateTime']/@title").extract_first()
@@ -198,23 +208,31 @@ class StorySpider(scrapy.Spider):
                     date_time = div_tmark.xpath(".//abbr[@class='DateTime']/text()").extract_first()
                 date_obj = datetime.strptime(date_time, "%b %d, %Y at %I:%M %p")
                 date_obj = date_obj.replace(tzinfo=utc)
-                story_seg.published = date_obj
+                # story_seg.published = date_obj
                 # =============================================================================
 
-                # If you want to include the formatting of the original page, change the following
-                # line to ..... .//blockquote/node()").extract()
-                content = "".join(div_tmark.xpath(".//blockquote//text()").extract())
-                story_seg.contents = content
+                story_seg, seg_created = StorySegment.objects.get_or_create(story=story_item,
+                                                                            title=title,
+                                                                            published=date_obj)
 
-                print("Title: {0}   Author: {1}".format(story_seg.title, author))
-                print("date_time: {0}".format(date_obj))
-                print("content length: {0}".format(len(content)))
+                # only "save" the story if it is new. if it already existed before, skip it
+                if seg_created:
+                    # If you want to include the formatting of the original page, change the following
+                    # line to ..... .//blockquote/node()").extract()
+                    # As it stands, we don't necessarily need the <br /> tags and such.
+                    content = "".join(div_tmark.xpath(".//blockquote//text()").extract())
+                    story_seg.contents = content
 
-                story_seg.save()
-                story_item.save()
+                    print("Title: {0}   Author: {1}".format(story_seg.title, author))
+                    print("date_time: {0}".format(date_obj))
+                    # print("content length: {0}".format(len(content)))
+
+                    story_seg.save()
+                    story_item.save()
 
             div_next_tmark = div_tmarks[-1].xpath(".//span[@class='next']")
-            
+
+            # navigate to the next threadmark.
             if div_next_tmark is not None:
                 next_mark = div_next_tmark.xpath("a/@href").extract_first() 
                 print("Next url: {0}".format(next_mark))
@@ -227,27 +245,38 @@ class StorySpider(scrapy.Spider):
                 )
 
     def update_stories(self, response):
-        """ Attempt to update all stories indexed in the database
+        """ This function will update a specific thread that already exists in the database.
+        The response field already begins at the threadmarks page, and will scan the
+        threadmark titles until it finds one that isn't in the story. Then it will simply
+        send the scraping to the normal <scan_thread> method
 
-        Makes queryset of all story objects, gets the storyhosts and segments,
-        checks if the last segment available is older than the 'last scraped'
-        field in the storyhost.
-
-        :param self:
         :param response:
+        :META param story_item:
         :return:
         """
-        story_hosts = []
-        indexed_stories = Story.objects.all()
 
-        for story in indexed_stories:
-            try:
-                story_host = StoryHost.objects.get(story=story, host=self.HOST)
-                story_hosts.append(story_host)
-                print("Updating story: {0}".format(story.title.encode('utf-8')))
+        print("Scraping threadmarks at: {0}".format(response.url))
+        story_item = response.meta.get("story_item")
 
-            except django.core.exceptions.ObjectDoesNotExist:
-                print("Couldn't find story: {0}".format(story.title.encode('utf-8')))
+        threadmarks_list = response.xpath("//li[contains(@class, 'threadmarkItem')]")
+
+        url = None
+        for tmark in threadmarks_list:
+            chapter_title = "".join(tmark.xpath("./a/@data-previewUrl/text()").extract())
+            published_date = tmark.xpath(".//span[@class='DateTime']/@title").extract_first()
+            published_date = datetime.strptime(published_date, "%b %d, %Y at %I:%M %p").replace(tzinfo=utc)
+
+            story_seg, created = StorySegment.objects.get_or_create(story=story_item,
+                                                                    title=chapter_title,
+                                                                    published=published_date)
+            if not created:
+                url = tmark.xpath("./a/@href").extract_first()
+                url = response.urljoin(url)
+                break
+
+        if url is not None:
+            yield scrapy.Request(url=url, callback=self.scan_thread, meta={"story_item": story_item})
+
 
     def get_last_seg_date(self, story):
         """ return the datetime object of the last segment in this story.
@@ -260,11 +289,13 @@ class StorySpider(scrapy.Spider):
         """
 
         # retrieve the LAST story segment (ordered by published date)
+        # if this entry doesn't exist, there are no story segments. Return the
+        # oldest possible date.
         try:
-            story_segs = StorySegment.objects.filter(story=story).order_by("published").reverse()[0]
+            story_segs = StorySegment.objects.filter(story=story).order_by("-published")[0]
             print ("lastdate for {0}: {1}".format(story.title, story_segs.published))
             return story_segs.published
         except IndexError:
             print(" no lastdate found for story [{0}]".format(story.title))
-            return None
+            return datetime.max.replace(tzinfo=utc)
 
