@@ -63,7 +63,7 @@ class StorySpider(scrapy.Spider):
             yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
 
         for (url, story) in self.update_list:
-            yield scrapy.Request(url, callback=self.update_stories, priority=5, meta={"story_item": story})
+            yield scrapy.Request(url, callback=self.update_stories, priority=1, meta={"story_item": story})
         """
         if next_page_link is not None:
 
@@ -97,6 +97,11 @@ class StorySpider(scrapy.Spider):
             if last_post_date is not None:
                 date_obj = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p")
                 last_post_date = date_obj.replace(tzinfo=utc)
+            else:
+                last_post_date = thread_tag.xpath(".//span[@class='DateTime']/@title").extract_first()
+                last_post_date = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p").replace(tzinfo=utc)
+
+
             # ============================================================================================
 
             author, created = Author.objects.get_or_create(name=author_name)
@@ -104,6 +109,7 @@ class StorySpider(scrapy.Spider):
                 author.save()
 
             title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract_first().encode('utf-8')
+            print("\n\ntitle extracted unicode test: {0}\n\n".format(title))
             story, created = Story.objects.get_or_create(title=title)
             if created:
                 story.save()
@@ -149,7 +155,7 @@ class StorySpider(scrapy.Spider):
 
             last_seg_date = self.get_last_seg_date(story)
             if thread_url is not None:
-                if last_seg_date > storyhost.last_scraped:
+                if last_post_date > storyhost.last_scraped or last_seg_date < last_post_date:
                     storyhost.last_scraped = cur_date
                     storyhost.save()
                     thread_link = response.urljoin(thread_url)
@@ -159,7 +165,7 @@ class StorySpider(scrapy.Spider):
                     if created:
                         url_stories.append((thread_link, story))
                     else:
-                        self.update_list.append(("{0}/threadmarks".format(thread_link), story))
+                        self.update_list.append(("{0}threadmarks".format(thread_link), story))
                 else:
                     print("Skipping {0}".format(storyhost.url))
 
@@ -195,7 +201,6 @@ class StorySpider(scrapy.Spider):
                 author = div_tmark.xpath("@data-author").extract_first()
 
                 author_seg, created = Author.objects.get_or_create(name=author)
-                story_item.authors.add(author_seg)
 
                 title = "".join(div_tmark.xpath("div/span/text()").extract()).encode('utf-8')
                 title = " ".join(title.split())
@@ -223,9 +228,11 @@ class StorySpider(scrapy.Spider):
                     content = "".join(div_tmark.xpath(".//blockquote//text()").extract())
                     story_seg.contents = content
 
+                    story_item.authors.add(author_seg)
+
                     print("Title: {0}   Author: {1}".format(story_seg.title, author))
                     print("date_time: {0}".format(date_obj))
-                    # print("content length: {0}".format(len(content)))
+                    print("content length: {0}".format(len(content)))
 
                     story_seg.save()
                     story_item.save()
@@ -262,22 +269,28 @@ class StorySpider(scrapy.Spider):
 
         url = None
         for tmark in threadmarks_list:
-            chapter_title = "".join(tmark.xpath("./a/@data-previewUrl/text()").extract())
+            chapter_title = "".join(tmark.xpath("./a/text()").extract()).encode('utf-8')
+            chapter_title = " ".join(chapter_title.split())
             published_date = tmark.xpath(".//span[@class='DateTime']/@title").extract_first()
+            if published_date is None:
+                published_date = tmark.xpath(".//abbr[@class='DateTime']/text()").extract_first()
             published_date = datetime.strptime(published_date, "%b %d, %Y at %I:%M %p").replace(tzinfo=utc)
+
+            print("Trying to update story: {0}".format(story_item.title))
+            print("\tchapter title: {0}  date: {1}".format(chapter_title, published_date))
 
             story_seg, created = StorySegment.objects.get_or_create(story=story_item,
                                                                     title=chapter_title,
                                                                     published=published_date)
-            if not created:
+            if created:
                 url = tmark.xpath("./a/@href").extract_first()
                 url = response.urljoin(url)
                 break
 
         if url is not None:
-            yield scrapy.Request(url=url, callback=self.scan_thread, meta={"story_item": story_item})
+            yield scrapy.Request(url=url, callback=self.scan_thread, priority=2, meta={"story_item": story_item})
 
-
+    # This function might not be necessary.
     def get_last_seg_date(self, story):
         """ return the datetime object of the last segment in this story.
 
@@ -296,6 +309,9 @@ class StorySpider(scrapy.Spider):
             print ("lastdate for {0}: {1}".format(story.title, story_segs.published))
             return story_segs.published
         except IndexError:
-            print(" no lastdate found for story [{0}]".format(story.title))
-            return datetime.max.replace(tzinfo=utc)
+            try:
+                print(" no lastdate found for story [{0}]".format(story.title))
+            except UnicodeEncodeError:
+                print(" no lastdate found for story [{0}]".format(story.title.encode('utf-8')))
+            return datetime.min.replace(tzinfo=utc)
 
