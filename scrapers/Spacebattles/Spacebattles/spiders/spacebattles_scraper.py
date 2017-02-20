@@ -109,7 +109,7 @@ class StorySpider(scrapy.Spider):
                 author.save()
 
             title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract_first().encode('utf-8')
-            print("\n\ntitle extracted unicode test: {0}\n\n".format(title))
+            # print("\n\ntitle extracted unicode test: {0}\n\n".format(title))
             story, created = Story.objects.get_or_create(title=title)
             if created:
                 story.save()
@@ -208,10 +208,10 @@ class StorySpider(scrapy.Spider):
                 # story_seg.story = story_item
 
                 # Get the Date and clean it up/format it ======================================
-                date_time = div_tmark.xpath(".//span[@class='DateTime']/@title").extract_first()
-                if date_time is None:
-                    date_time = div_tmark.xpath(".//abbr[@class='DateTime']/text()").extract_first()
-                date_obj = datetime.strptime(date_time, "%b %d, %Y at %I:%M %p")
+                date = div_tmark.xpath(".//span[@class='DateTime' and ../@class!='editDate']/@title").extract_first()
+                if date is None:
+                    date = div_tmark.xpath(".//abbr[@class='DateTime']/text()").extract_first()
+                date_obj = datetime.strptime(date, "%b %d, %Y at %I:%M %p")
                 date_obj = date_obj.replace(tzinfo=utc)
                 # story_seg.published = date_obj
                 # =============================================================================
@@ -220,22 +220,20 @@ class StorySpider(scrapy.Spider):
                                                                             title=title,
                                                                             published=date_obj)
 
-                # only "save" the story if it is new. if it already existed before, skip it
-                if seg_created:
-                    # If you want to include the formatting of the original page, change the following
-                    # line to ..... .//blockquote/node()").extract()
-                    # As it stands, we don't necessarily need the <br /> tags and such.
-                    content = "".join(div_tmark.xpath(".//blockquote//text()").extract())
-                    story_seg.contents = content
+                # If you want to include the formatting of the original page, change the following
+                # line to ..... .//blockquote/node()").extract()
+                # As it stands, we don't necessarily need the <br /> tags and such.
+                content = "".join(div_tmark.xpath(".//blockquote//text()").extract())
+                story_seg.contents = content
 
-                    story_item.authors.add(author_seg)
+                story_item.authors.add(author_seg)
 
-                    print("Title: {0}   Author: {1}".format(story_seg.title, author))
-                    print("date_time: {0}".format(date_obj))
-                    print("content length: {0}".format(len(content)))
+                print("Title: {0}   Author: {1}".format(story_seg.title, author))
+                print("date_time: {0}".format(date_obj))
+                print("content length: {0}".format(len(content)))
 
-                    story_seg.save()
-                    story_item.save()
+                story_seg.save()
+                story_item.save()
 
             div_next_tmark = div_tmarks[-1].xpath(".//span[@class='next']")
 
@@ -306,7 +304,10 @@ class StorySpider(scrapy.Spider):
         # oldest possible date.
         try:
             story_segs = StorySegment.objects.filter(story=story).order_by("-published")[0]
-            print ("lastdate for {0}: {1}".format(story.title, story_segs.published))
+            try:
+                print ("lastdate for {0}: {1}".format(story.title, story_segs.published))
+            except UnicodeEncodeError:
+                print ("lastdate for {0}: {1}".format(story.title.encode('utf-8'), story_segs.published))
             return story_segs.published
         except IndexError:
             try:
