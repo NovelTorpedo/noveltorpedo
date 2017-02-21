@@ -46,10 +46,6 @@ class StorySpider(scrapy.Spider):
 
         """
 
-        # asynchronously try and update any stories...
-        # self.update_stories(response)
-        # return
-
         current_page = response.xpath("//a[@class='currentPage ']/text()")
         print("current page: {0}".format(current_page.extract_first()))
 
@@ -64,13 +60,12 @@ class StorySpider(scrapy.Spider):
 
         for (url, story) in self.update_list:
             yield scrapy.Request(url, callback=self.update_stories, priority=1, meta={"story_item": story})
-        """
+
         if next_page_link is not None:
 
-            #print("next page link: {0}".format(next_page_link))
+            # print("next page link: {0}".format(next_page_link))
             next_page_link = response.urljoin(next_page_link)
             yield scrapy.Request(next_page_link, callback=self.loop_pages, priority=0)
-        """
 
     def get_thread_urls(self, response):
 
@@ -95,12 +90,10 @@ class StorySpider(scrapy.Spider):
             # Get the last post date for a thread ========================================================
             last_post_date = thread_tag.xpath(".//dl[@class='lastPostInfo']//abbr/text()").extract_first()
             if last_post_date is not None:
-                date_obj = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p")
-                last_post_date = date_obj.replace(tzinfo=utc)
+                last_post_date = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p").replace(tzinfo=utc)
             else:
                 last_post_date = thread_tag.xpath(".//span[@class='DateTime']/@title").extract_first()
                 last_post_date = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p").replace(tzinfo=utc)
-
 
             # ============================================================================================
 
@@ -109,8 +102,8 @@ class StorySpider(scrapy.Spider):
                 author.save()
 
             title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract_first().encode('utf-8')
-            # print("\n\ntitle extracted unicode test: {0}\n\n".format(title))
             story, created = Story.objects.get_or_create(title=title)
+
             if created:
                 story.save()
             story.authors.add(author)
@@ -119,8 +112,7 @@ class StorySpider(scrapy.Spider):
             thread_url = a_node.xpath("@href").extract_first()
 
             cur_date = datetime.now(tz=utc)
-            oldest_date = datetime.min
-            oldest_date = oldest_date.replace(tzinfo=utc)
+            oldest_date = datetime.min.replace(tzinfo=utc)
 
             created = False
             """
@@ -181,7 +173,6 @@ class StorySpider(scrapy.Spider):
         no next link, it gracefully closes. It also creates story
         segments, and links them to a story. (django models)
 
-
         Keyword arguments:
         response -- the response object used to navigate the page
 
@@ -204,8 +195,6 @@ class StorySpider(scrapy.Spider):
 
                 title = "".join(div_tmark.xpath("div/span/text()").extract()).encode('utf-8')
                 title = " ".join(title.split())
-                # story_seg.title = title
-                # story_seg.story = story_item
 
                 # Get the Date and clean it up/format it ======================================
                 date = div_tmark.xpath(".//span[@class='DateTime' and ../@class!='editDate']/@title").extract_first()
@@ -255,6 +244,9 @@ class StorySpider(scrapy.Spider):
         threadmark titles until it finds one that isn't in the story. Then it will simply
         send the scraping to the normal <scan_thread> method
 
+        If all the threadmarks in the list are already created,
+        it returns without sending any url requests to the website.
+
         :param response:
         :META param story_item:
         :return:
@@ -288,12 +280,14 @@ class StorySpider(scrapy.Spider):
         if url is not None:
             yield scrapy.Request(url=url, callback=self.scan_thread, priority=2, meta={"story_item": story_item})
 
-    # This function might not be necessary.
     def get_last_seg_date(self, story):
         """ return the datetime object of the last segment in this story.
 
         will query the database for the last published story segment of <story>
         and return the datetime value for <published>
+
+        If the <story> object doesn't have any segments associated with it, it returns
+        the minimum date_time object.
 
         :param story:
         :return: datetime object
