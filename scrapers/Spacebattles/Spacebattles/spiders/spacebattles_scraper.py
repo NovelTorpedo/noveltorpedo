@@ -34,6 +34,8 @@ class StorySpider(scrapy.Spider):
             "https://forums.spacebattles.com/forums/creative-writing.18"
         ]
 
+        # start the requests for the base urls. Currently only scraping
+        # creative-writing.18
         for url in urls:
             yield scrapy.Request(url=url, callback=self.loop_pages)
 
@@ -55,9 +57,11 @@ class StorySpider(scrapy.Spider):
         # urls_stories is a tuple with a url, and a corresponding Story object
         urls_stories = self.get_thread_urls(response)
 
+        # generate requests for -- new -- stories
         for (url, story) in urls_stories:
             yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
 
+        # generate requests for stories that need to be updated.
         for (url, story) in self.update_list:
             yield scrapy.Request(url, callback=self.update_stories, priority=1, meta={"story_item": story})
 
@@ -81,6 +85,8 @@ class StorySpider(scrapy.Spider):
         print("scraping {0}".format(response.url))
         url_stories = []
 
+        # <li_tags> is a list of all the <li> tags in the html doc with a certain class value.
+        # This corresponds to all threads that are NOT sticky.
         li_tags = response.xpath("//li[@class='discussionListItem visible  ']")
 
         for thread_tag in li_tags:
@@ -92,6 +98,7 @@ class StorySpider(scrapy.Spider):
             if last_post_date is not None:
                 last_post_date = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p").replace(tzinfo=utc)
             else:
+                # fix with line continuation.
                 last_post_date = thread_tag.xpath(".//span[@class='DateTime']/@title").extract_first()
                 last_post_date = datetime.strptime(last_post_date, "%b %d, %Y at %I:%M %p").replace(tzinfo=utc)
 
@@ -104,6 +111,7 @@ class StorySpider(scrapy.Spider):
             title = thread_tag.xpath(".//h3[@class='title']/a/text()").extract_first().encode('utf-8')
             story, created = Story.objects.get_or_create(title=title)
 
+            # if created is true, then it's a brand new story, so make sure to save it.
             if created:
                 story.save()
             story.authors.add(author)
@@ -182,6 +190,8 @@ class StorySpider(scrapy.Spider):
         story_item = response.meta.get("story_item")
         print("\nscraping thread {0}\n".format(response.url))
 
+        # div_tmarks is a list of all threadmarked posts on this story thread
+        # ...at least on this PAGE of the story.
         div_tmarks = response.xpath("//li[contains(@class, 'hasThreadmark')]")
         
         if div_tmarks is not None and len(div_tmarks) > 0:
@@ -258,6 +268,10 @@ class StorySpider(scrapy.Spider):
         threadmarks_list = response.xpath("//li[contains(@class, 'threadmarkItem')]")
 
         url = None
+
+        # scan the threadmarks until we reach one that **WAS NOT ALREADY CREATED***
+        # get_or_create will return created to be TRUE, meaning this threadmark wasn't
+        # already in the database. Set the url to that threadmark, and scan that thread.
         for tmark in threadmarks_list:
             chapter_title = "".join(tmark.xpath("./a/text()").extract()).encode('utf-8')
             chapter_title = " ".join(chapter_title.split())
@@ -278,6 +292,7 @@ class StorySpider(scrapy.Spider):
                 break
 
         if url is not None:
+            # Set priority to slightly higher, and make sure to pass in the corresponding story_item.
             yield scrapy.Request(url=url, callback=self.scan_thread, priority=2, meta={"story_item": story_item})
 
     def get_last_seg_date(self, story):
@@ -296,6 +311,9 @@ class StorySpider(scrapy.Spider):
         # retrieve the LAST story segment (ordered by published date)
         # if this entry doesn't exist, there are no story segments. Return the
         # oldest possible date.
+
+        # ...various errors due to unicode problems....due to the data coming from either
+        # the database, or the website.
         try:
             story_segs = StorySegment.objects.filter(story=story).order_by("-published")[0]
             try:
