@@ -6,28 +6,34 @@ from django.test import TestCase
 
 class MockPost(object):
     def __init__(self, title=""):
-        self.title = title
-        self.body = ""
-        self.timestamp = datetime.datetime.now().timestamp()
+        super(MockPost, self).__init__()
+        self._title = title
+        self._body = ""
+        self._timestamp = (datetime.datetime.now() -
+                          datetime.datetime.fromtimestamp(0)).total_seconds()
+
+    def body(self, body=""):
+        self._body = body
+        return self
 
 class MockBlog(object):
     def __init__(self, blog_name, blog_title, nsfw):
-        super().__init__()
-        self.name = blog_name
-        self.title = blog_title
-        self.nsfw = nsfw
-        self.posts = []
+        super(MockBlog, self).__init__()
+        self._name = blog_name
+        self._title = blog_title
+        self._nsfw = nsfw
+        self._posts = []
 
     def add_post(self, post):
-        self.posts.append(post)
+        self._posts.append(post)
 
 class MockTumblrClient(object):
     def __init__(self):
-        super().__init__()
-        self.blogs = {}
+        super(MockTumblrClient, self).__init__()
+        self._blogs = {}
 
     def add_blog(self, blog):
-        self.blogs[blog.name] = blog
+        self._blogs[blog.name] = blog
 
     def blog_info(self, blog_name):
         """
@@ -36,7 +42,7 @@ class MockTumblrClient(object):
         (bool) and "title" (string).
         """
         # If this fails it will raise a KeyError, as the real pytumblr does.
-        blog = self.blogs[blog_name]
+        blog = self._blogs[blog_name]
         return {"blog":dict(blog)}
 
     def posts(self, blog_name, **kwargs):
@@ -47,15 +53,14 @@ class MockTumblrClient(object):
         dictionaries with keys "timestamp" "title" "body"
         """
         # If this fails it will raise a KeyError, as the real pytumblr does.
-        blog = self.blogs[blog_name]
+        blog = self._blogs[blog_name]
         return {"posts":map(dict, blog.posts)}
 
 class TumblrTests(TestCase):
     def setUp(self):
         client = MockTumblrClient()
         blog = MockBlog("mock_blog", "My Mockup Blog", False)
-        post = MockPost("Title of the Post")
-        post.body = "Contents of the post."
+        post = MockPost("Title of the Post").body("Contents of the post.")
         blog.add_post(post)
         fetch_tumblr.client = client
 
