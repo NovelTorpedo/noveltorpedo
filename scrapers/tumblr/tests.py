@@ -129,10 +129,36 @@ class TumblrTests(TestCase):
         fetch_tumblr.client = MockTumblrClient()
 
     def add_simple_blog(self):
-        # Insert a fake blog with one post.
+        """
+        Insert a fake blog with one post.
+        """
         mock_blog = MockBlog("mock_blog", "My Mockup Blog", False)
         mock_blog.add_post("Title of the Post", "Contents of the post.")
         fetch_tumblr.client.add_blog(mock_blog)
+
+    def add_long_blog(self, count=111):
+        """
+        Insert a fake blog with many posts that have sequential timestamps.
+        """
+        long_blog = MockBlog("long_blog", "A Really Long Blog", False)
+        for i in xrange(count):
+            long_blog.add_post("Post #{0}".format(i), "", i)
+        fetch_tumblr.client.add_blog(long_blog)
+
+    def add_empty_blog(self):
+        """
+        Insert a fake blog with no posts.
+        """
+        empty_blog = MockBlog("empty_blog", "Shhhh.", False)
+        fetch_tumblr.client.add_blog(empty_blog)
+
+    def add_nsfw_blog(self):
+        """
+        Insert a fake blog that's marked NSFW.
+        """
+        nsfw_blog = MockBlog("nsfw_blog", "Don't Read This at Work!", True)
+        nsfw_blog.add_post("A Raunchy Post", "This is not work-appropriate.")
+        fetch_tumbr.client.add_blog(nsfw_blog)
 
     def test_get_create_storyhost(self):
         """
@@ -171,4 +197,5 @@ Test brainstorm:
     * update does nothing when there are no posts
     * update changes last_scraped in all the above cases
     * trivial test for get_posts? (just a passthrough to the mock really)
+    * only text posts are requested
 """
