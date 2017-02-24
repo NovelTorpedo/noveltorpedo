@@ -83,7 +83,7 @@ class StorySegment(models.Model):
     Each StorySegment entity comprises a body of text, for instance a single chapter of a story.
     """
     story = models.ForeignKey(Story, on_delete=models.CASCADE)
-    title = models.CharField(max_length=512)
+    title = models.CharField(max_length=512, null=True)
     contents = models.TextField(default='')
     published = models.DateTimeField()
 
