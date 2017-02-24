@@ -127,17 +127,48 @@ class TumblrTests(TestCase):
         fetch_tumblr.tumblr = models.Host.objects.get_or_create(**fetch_tumblr.host_attrs)[0]
         # Replace the pytumblr client with a mockup.
         fetch_tumblr.client = MockTumblrClient()
+
+    def add_simple_blog(self):
         # Insert a fake blog with one post.
         mock_blog = MockBlog("mock_blog", "My Mockup Blog", False)
         mock_blog.add_post("Title of the Post", "Contents of the post.")
         fetch_tumblr.client.add_blog(mock_blog)
 
-    def test_create_storyhost(self):
+    def test_get_create_storyhost(self):
         """
         Verify that get_or_create_storyhost does both of those things and
         returns the same StoryHost object for the same input.
         """
+        self.add_simple_blog()
         created_sh = fetch_tumblr.get_or_create_storyhost("mock_blog")
         retrieved_sh = fetch_tumblr.get_or_create_storyhost("mock_blog")
         self.assertIsInstance(created_sh, models.StoryHost)
         self.assertEqual(created_sh, retrieved_sh)
+
+    def test_no_such_storyhost(self):
+        """
+        Verify that the appropriate exception is raised when the requested
+        blog doesn't exist.
+        """
+        # No blogs exist at all.
+        self.assertRaises(fetch_tumblr.TumblrNotFound,
+                          fetch_tumblr.get_or_create_storyhost,
+                          "nonexistent_blog")
+        self.add_simple_blog()
+        # A blog exists, but not the one we're looking for.
+        self.assertRaises(fetch_tumblr.TumblrNotFound,
+                          fetch_tumblr.get_or_create_storyhost,
+                          "nonexistent_blog")
+        self.add_simple_blog()
+
+
+"""
+Test brainstorm:
+    * created storyhost has the correct attributes
+    * update finds new posts
+    * update doesn't duplicate old posts
+    * update finds all posts when post count > limit
+    * update does nothing when there are no posts
+    * update changes last_scraped in all the above cases
+    * trivial test for get_posts? (just a passthrough to the mock really)
+"""
