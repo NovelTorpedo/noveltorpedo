@@ -1,20 +1,13 @@
+"""
+Tests for the Tumblr fetcher. Run with noveltorpedo/website/manage.py test
+while in this directory.
+"""
+
 import datetime
 import fetch_tumblr
 
 from noveltorpedo import models
 from django.test import TestCase
-
-class MockPost(object):
-    def __init__(self, title=""):
-        super(MockPost, self).__init__()
-        self.title = title
-        self.body = ""
-        self.timestamp = (datetime.datetime.now() -
-                          datetime.datetime.fromtimestamp(0)).total_seconds()
-
-    def set_body(self, body=""):
-        self.body = body
-        return self
 
 class MockBlog(object):
     def __init__(self, blog_name, blog_title, is_nsfw):
@@ -24,7 +17,12 @@ class MockBlog(object):
         self.is_nsfw = is_nsfw
         self.posts = []
 
-    def add_post(self, post):
+    def add_post(self, title="", body=""):
+        post = {}
+        post["title"] = title
+        post["body"] = body
+        post["timestamp"] = (datetime.datetime.now() -
+                          datetime.datetime.fromtimestamp(0)).total_seconds()
         self.posts.append(post)
 
 class MockTumblrClient(object):
@@ -62,8 +60,7 @@ class TumblrTests(TestCase):
         fetch_tumblr.tumblr = models.Host.objects.get_or_create(**fetch_tumblr.host_attrs)[0]
         fetch_tumblr.client = MockTumblrClient()
         mock_blog = MockBlog("mock_blog", "My Mockup Blog", False)
-        post = MockPost("Title of the Post").set_body("Contents of the post.")
-        mock_blog.add_post(post)
+        mock_blog.add_post("Title of the Post", "Contents of the post.")
         fetch_tumblr.client.add_blog(mock_blog)
 
     def test_create_storyhost(self):
