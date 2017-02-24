@@ -7,33 +7,33 @@ from django.test import TestCase
 class MockPost(object):
     def __init__(self, title=""):
         super(MockPost, self).__init__()
-        self._title = title
-        self._body = ""
-        self._timestamp = (datetime.datetime.now() -
+        self.title = title
+        self.body = ""
+        self.timestamp = (datetime.datetime.now() -
                           datetime.datetime.fromtimestamp(0)).total_seconds()
 
-    def body(self, body=""):
-        self._body = body
+    def set_body(self, body=""):
+        self.body = body
         return self
 
 class MockBlog(object):
-    def __init__(self, blog_name, blog_title, nsfw):
+    def __init__(self, blog_name, blog_title, is_nsfw):
         super(MockBlog, self).__init__()
-        self._name = blog_name
-        self._title = blog_title
-        self._nsfw = nsfw
-        self._posts = []
+        self.name = blog_name
+        self.title = blog_title
+        self.is_nsfw = is_nsfw
+        self.posts = []
 
     def add_post(self, post):
-        self._posts.append(post)
+        self.posts.append(post)
 
 class MockTumblrClient(object):
     def __init__(self):
         super(MockTumblrClient, self).__init__()
-        self._blogs = {}
+        self.blogs = {}
 
     def add_blog(self, blog):
-        self._blogs[blog.name] = blog
+        self.blogs[blog.name] = blog
 
     def blog_info(self, blog_name):
         """
@@ -42,8 +42,8 @@ class MockTumblrClient(object):
         (bool) and "title" (string).
         """
         # If this fails it will raise a KeyError, as the real pytumblr does.
-        blog = self._blogs[blog_name]
-        return {"blog":dict(blog)}
+        blog = self.blogs[blog_name]
+        return {"blog":blog.__dict__}
 
     def posts(self, blog_name, **kwargs):
         """
@@ -53,16 +53,20 @@ class MockTumblrClient(object):
         dictionaries with keys "timestamp" "title" "body"
         """
         # If this fails it will raise a KeyError, as the real pytumblr does.
-        blog = self._blogs[blog_name]
+        blog = self.blogs[blog_name]
         return {"posts":map(dict, blog.posts)}
 
 class TumblrTests(TestCase):
     def setUp(self):
-        client = MockTumblrClient()
-        blog = MockBlog("mock_blog", "My Mockup Blog", False)
-        post = MockPost("Title of the Post").body("Contents of the post.")
-        blog.add_post(post)
-        fetch_tumblr.client = client
+        fetch_tumblr.host_attrs["wait"] = 0
+        fetch_tumblr.tumblr = models.Host.objects.get_or_create(**fetch_tumblr.host_attrs)[0]
+        fetch_tumblr.client = MockTumblrClient()
+        mock_blog = MockBlog("mock_blog", "My Mockup Blog", False)
+        post = MockPost("Title of the Post").set_body("Contents of the post.")
+        mock_blog.add_post(post)
+        fetch_tumblr.client.add_blog(mock_blog)
 
-    def test_emptytest(self):
-        print("Yay, a test.")
+    def test_create_storyhost(self):
+        created_sh = fetch_tumblr.get_or_create_storyhost("mock_blog")
+        retrieved_sh = fetch_tumblr.get_or_create_storyhost("mock_blog")
+        self.assertEqual(created_sh, retrieved_sh)
