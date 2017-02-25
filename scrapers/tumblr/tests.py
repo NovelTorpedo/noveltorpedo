@@ -8,6 +8,7 @@ import fetch_tumblr
 from datetime import datetime
 from pytz import utc
 from django.test import TestCase
+from django.core.exceptions import ObjectDoesNotExist
 from noveltorpedo import models
 
 
@@ -218,24 +219,18 @@ class TumblrTests(TestCase):
                 self.assertEqual(attr.key, "nsfw")
                 self.assertEqual(attr.value, "TRUE")
             else:
-                """
-                # Commented because it's broken and I haven't figured out why yet.
+                # Doing this instead of assertRaises because of import path
+                # weirdness, c.f. http://stackoverflow.com/q/549677/7619818
+                # (If you can figure out how to make the plain assertRaises
+                # work, by all means change this!)
                 try:
                     attr = models.StoryAttribute.objects.get(story=story)
-                except Exception as e:
+                except ObjectDoesNotExist as e:
+                    # This is the superclass for all DoesNotExist errors.
                     self.assertIsInstance(e, models.StoryAttribute.DoesNotExist)
-                    # ^-- this assertion passes ...
-                    print type(e) # <class 'noveltorpedo.models.DoesNotExist'>
-                self.assertRaises(models.StoryAttribute.DoesNotExist,
-                                  models.StoryAttribute.objects.get,
-                                  story=story)
-                # ^-- ... but this assertion fails??
-                """
-                pass
 
 """
 Test brainstorm:
-    * created storyhost has the correct attributes
     * update finds new posts
     * update doesn't duplicate old posts
     * update finds all posts when post count > limit
