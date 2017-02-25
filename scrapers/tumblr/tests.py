@@ -90,7 +90,7 @@ class MockTumblrClient(object):
         Raises:
             KeyError: The requested MockBlog hasn't been added to the client.
         """
-        return {"blog":self.blogs[blog_name].__dict__}
+        return {"blog": self.blogs[blog_name].__dict__}
 
     def posts(self, blog_name, **kwargs):
         """
@@ -107,8 +107,8 @@ class MockTumblrClient(object):
 
         Returns:
             A dictionary with one key, "posts", whose value is a list of
-            dictionaries which each include the keys "title" and "body" (strings)
-            and "timestamp" (a UNIX timestamp).
+            dictionaries which each include the keys "title" and "body"
+            (strings) and "timestamp" (a UNIX timestamp).
 
         Raises:
             KeyError: The requested MockBlog hasn't been added to the client.
@@ -126,7 +126,7 @@ class MockTumblrClient(object):
         all_posts.sort(key=lambda p: p["timestamp"], reverse=True)
         start = kwargs["offset"]
         end = kwargs["offset"] + kwargs["limit"]
-        return {"posts":all_posts[start:end]}
+        return {"posts": all_posts[start:end]}
 
 
 class TumblrTests(TestCase):
@@ -140,7 +140,8 @@ class TumblrTests(TestCase):
         # We don't need to sleep between calls when just running tests.
         fetch_tumblr.host_attrs["wait"] = 0
         # Create the host entry for Tumblr in the database.
-        fetch_tumblr.tumblr = models.Host.objects.get_or_create(**fetch_tumblr.host_attrs)[0]
+        attrs = fetch_tumblr.host_attrs
+        fetch_tumblr.tumblr = models.Host.objects.get_or_create(**attrs)[0]
         # Replace the pytumblr client with a mockup.
         fetch_tumblr.client = MockTumblrClient()
         # Don't spam us with debug messages.
@@ -180,7 +181,7 @@ class TumblrTests(TestCase):
 
     def make_segments(self, blog_name):
         """
-	Retrieve all story segments corresponding to a blog name from the
+        Retrieve all story segments corresponding to a blog name from the
         database. Requires both that the blog has been added to the client
         with MockTumblrClient.add_blog(), and calls fetch_tumblr.update_story()
         to create the segments (if the blog has any posts in it).
@@ -239,8 +240,9 @@ class TumblrTests(TestCase):
             author = models.Author.objects.get(name=blog_name)
             # Check the storyhost's attributes.
             self.assertEqual(sh.host, fetch_tumblr.tumblr)
-            # Last scraped should be the oldest possible, because we haven't yet.
-            self.assertEqual(sh.last_scraped, datetime.min.replace(tzinfo=utc))
+            # Last scraped should be the oldest possible, because we haven't.
+            self.assertEqual(sh.last_scraped,
+                             datetime.min.replace(tzinfo=utc))
             # Check the story attributes.
             self.assertEqual(story.title, blogs[blog_name].title)
             # Tumblrs have exactly one author.
@@ -260,7 +262,8 @@ class TumblrTests(TestCase):
                     attr = models.StoryAttribute.objects.get(story=story)
                 except ObjectDoesNotExist as e:
                     # This is the superclass for all DoesNotExist errors.
-                    self.assertIsInstance(e, models.StoryAttribute.DoesNotExist)
+                    self.assertIsInstance(e,
+                                          models.StoryAttribute.DoesNotExist)
 
     def test_get_posts(self):
         """
