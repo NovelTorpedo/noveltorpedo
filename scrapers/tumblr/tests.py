@@ -7,7 +7,6 @@ import fetch_tumblr
 
 from datetime import datetime
 from pytz import utc
-from logging import INFO
 from django.test import TestCase
 from django.core.exceptions import ObjectDoesNotExist
 from noveltorpedo import models
@@ -144,8 +143,6 @@ class TumblrTests(TestCase):
         fetch_tumblr.tumblr = models.Host.objects.get_or_create(**attrs)[0]
         # Replace the pytumblr client with a mockup.
         fetch_tumblr.client = MockTumblrClient()
-        # Don't spam us with debug messages.
-        fetch_tumblr.logger.setLevel(INFO)
 
     def add_simple_blog(self):
         """
