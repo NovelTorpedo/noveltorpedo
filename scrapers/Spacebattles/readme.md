@@ -38,3 +38,9 @@ scrapy crawl sb_spider
 
 
 To see results, update the index of the database. Instructions found [here](../../website)
+
+
+## Testing the scraper
+
+To quickly test the scraper, offline or online, run the appropriate `runtests` command.
+For the test to work, make sure your are working in same virtual environment is activated.
