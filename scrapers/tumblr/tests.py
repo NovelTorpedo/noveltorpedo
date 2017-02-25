@@ -120,8 +120,10 @@ class MockTumblrClient(object):
         all_posts = self.blogs[blog_name].posts
         # In production code I'd store them sorted instead, but in tests the
         # insert:retrieve ratio is so much higher that I think this is faster.
-        all_posts.sort(key=lambda p: p["timestamp"])
-        return {"posts":all_posts[len(all_posts)-kwargs["offset"]:-kwargs["offset"]-kwargs["limit"]-1:-1]}
+        all_posts.sort(key=lambda p: p["timestamp"], reverse=True)
+        start = kwargs["offset"]
+        end = kwargs["offset"] + kwargs["limit"]
+        return {"posts":all_posts[start:end]}
 
 
 class TumblrTests(TestCase):
@@ -252,6 +254,16 @@ class TumblrTests(TestCase):
         # This is set in add_long_blog; what we're actually doing here
         # is verifying that the default offset was correct (0).
         self.assertEqual(posts[0]["timestamp"], 50)
+        posts = fetch_tumblr.get_posts("long_blog", offset=1)
+        self.assertEqual(posts[0]["timestamp"], 49)
+        self.assertEqual(len(posts), 20)
+        posts = fetch_tumblr.get_posts("long_blog", offset=100)
+        self.assertEqual(len(posts), 0)
+        posts = fetch_tumblr.get_posts("long_blog", offset=49)
+        self.assertEqual(len(posts), 1)
+        self.assertEqual(posts[0]["timestamp"], 1)
+        posts = fetch_tumblr.get_posts("long_blog", limit=1)
+        self.assertEqual(len(posts), 1)
 
 
 """
