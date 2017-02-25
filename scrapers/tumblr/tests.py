@@ -316,10 +316,34 @@ class TumblrTests(TestCase):
         segments = self.make_segments("mock_blog")
         self.assertEqual(segments.count(), 2)
 
+    def test_no_posts_no_problem(self):
+        """
+        Verify that update_story() handles empty blogs.
+        """
+        self.add_empty_blog()
+        segments = self.make_segments("empty_blog")
+        self.assertEqual(segments.count(), 0)
+        # Really the assertion for this test is that no other error was raised.
+
+    def test_segment_contents(self):
+        """
+        Verify that the inserted segment matches the post data.
+        """
+        self.add_empty_blog()
+        post = {
+            "title": "For a Good",
+            "body": "Timestamp, call:",
+            "timestamp": 8675309
+            # (April 11, 1970, if you were wondering)
+        }
+        fetch_tumblr.client.blogs["empty_blog"].add_post(**post)
+        segment = self.make_segments("empty_blog").first()
+        self.assertEqual(segment.title, post["title"])
+        self.assertEqual(segment.contents, post["body"])
+        dt = datetime.fromtimestamp(post["timestamp"]).replace(tzinfo=utc)
+        self.assertEqual(segment.published, dt)
 
 """
 Test brainstorm:
-    * update does nothing when there are no posts
     * update changes last_scraped in all the above cases
-    * update inserts post contents correctly
 """
