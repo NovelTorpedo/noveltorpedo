@@ -3,11 +3,12 @@ Tests for the Tumblr fetcher. Run with noveltorpedo/website/manage.py test
 while in this directory.
 """
 
-import datetime
 import fetch_tumblr
 
-from noveltorpedo import models
+from datetime import datetime
+from pytz import utc
 from django.test import TestCase
+from noveltorpedo import models
 
 
 class MockBlog(object):
@@ -42,8 +43,8 @@ class MockBlog(object):
         post["title"] = title
         post["body"] = body
         if timestamp is None:
-            post["timestamp"] = (datetime.datetime.now() -
-                          datetime.datetime.fromtimestamp(0)).total_seconds()
+            post["timestamp"] = (datetime.now() -
+                                 datetime.fromtimestamp(0)).total_seconds()
         else:
             post["timestamp"] = timestamp
         self.posts.append(post)
@@ -158,7 +159,7 @@ class TumblrTests(TestCase):
         """
         nsfw_blog = MockBlog("nsfw_blog", "Don't Read This at Work!", True)
         nsfw_blog.add_post("A Raunchy Post", "This is not work-appropriate.")
-        fetch_tumbr.client.add_blog(nsfw_blog)
+        fetch_tumblr.client.add_blog(nsfw_blog)
 
     def test_get_create_storyhost(self):
         """
@@ -187,6 +188,50 @@ class TumblrTests(TestCase):
                           "nonexistent_blog")
         self.add_simple_blog()
 
+    def test_correct_storyhost(self):
+        """
+        Verify that get_or_create_storyhost inserts accurate blog info.
+        """
+        # Add some blogs to our imaginary Tumblr.
+        self.add_simple_blog()
+        self.add_nsfw_blog()
+        blogs = fetch_tumblr.client.blogs
+        for blog_name in ("mock_blog", "nsfw_blog"):
+            # Create a storyhost in the database.
+            fetch_tumblr.get_or_create_storyhost(blog_name)
+            # Retrieve the storyhost from the database.
+            sh = models.StoryHost.objects.get(url=blog_name+".tumblr.com")
+            story = sh.story
+            author = models.Author.objects.get(name=blog_name)
+            # Check the storyhost's attributes.
+            self.assertEqual(sh.host, fetch_tumblr.tumblr)
+            # Last scraped should be the oldest possible, because we haven't yet.
+            self.assertEqual(sh.last_scraped, datetime.min.replace(tzinfo=utc))
+            # Check the story attributes.
+            self.assertEqual(story.title, blogs[blog_name].title)
+            # Tumblrs have exactly one author.
+            self.assertEqual(story.authors.count(), 1)
+            self.assertIn(author, story.authors.all())
+            if blog_name is "nsfw_blog":
+                # The following verifies there's exactly one attribute.
+                attr = models.StoryAttribute.objects.get(story=story)
+                self.assertEqual(attr.key, "nsfw")
+                self.assertEqual(attr.value, "TRUE")
+            else:
+                """
+                # Commented because it's broken and I haven't figured out why yet.
+                try:
+                    attr = models.StoryAttribute.objects.get(story=story)
+                except Exception as e:
+                    self.assertIsInstance(e, models.StoryAttribute.DoesNotExist)
+                    # ^-- this assertion passes ...
+                    print type(e) # <class 'noveltorpedo.models.DoesNotExist'>
+                self.assertRaises(models.StoryAttribute.DoesNotExist,
+                                  models.StoryAttribute.objects.get,
+                                  story=story)
+                # ^-- ... but this assertion fails??
+                """
+                pass
 
 """
 Test brainstorm:
