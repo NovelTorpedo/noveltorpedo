@@ -93,14 +93,14 @@ class MockTumblrClient(object):
 
     def posts(self, blog_name, **kwargs):
         """
-        Fetch the content of posts in the specified blog.
-        TODO: Respect "offset" (int) and "limit" (int <= 20) arguments, and
-        verify that "type" and "filter" arguments are both "text".
+        Fetch the content of posts in the specified blog. This method assumes
+        it's being called by fetch_tumblr.get_posts and has all the keyword
+        arguments that function uses.
 
         Args:
             blog_name: The short name of a MockBlog.
             offset: int, how many posts back (from most recent) to start.
-            limit: int, how many posts to return (20 max).
+            limit: int, how many posts to return.
             type: Ignored, should always be "text".
             filter: Ignored, should always be "text".
 
@@ -112,7 +112,16 @@ class MockTumblrClient(object):
         Raises:
             KeyError: The requested MockBlog hasn't been added to the client.
         """
-        return {"posts":self.blogs[blog_name].posts}
+        # These are incidentally type assertions.
+        assert(kwargs["type"] == "text")
+        assert(kwargs["filter"] == "text")
+        assert(kwargs["offset"] >= 0)
+        assert(0 <= kwargs["limit"] <= fetch_tumblr.MAX_POSTS)
+        all_posts = self.blogs[blog_name].posts
+        # In production code I'd store them sorted instead, but in tests the
+        # insert:retrieve ratio is so much higher that I think this is faster.
+        all_posts.sort(key=lambda p: p["timestamp"])
+        return {"posts":all_posts[len(all_posts)-kwargs["offset"]:-kwargs["offset"]-kwargs["limit"]-1:-1]}
 
 
 class TumblrTests(TestCase):
@@ -143,7 +152,7 @@ class TumblrTests(TestCase):
         Insert a fake blog with many posts that have sequential timestamps.
         """
         long_blog = MockBlog("long_blog", "A Really Long Blog", False)
-        for i in xrange(count):
+        for i in xrange(1, count+1):
             long_blog.add_post("Post #{0}".format(i), "", i)
         fetch_tumblr.client.add_blog(long_blog)
 
@@ -229,6 +238,22 @@ class TumblrTests(TestCase):
                     # This is the superclass for all DoesNotExist errors.
                     self.assertIsInstance(e, models.StoryAttribute.DoesNotExist)
 
+    def test_get_posts(self):
+        """
+        Verify post retrieval from the client. This is honestly a test of the
+        mock itself more than the fetcher, which is just a passthrough, but it
+        does assert (in MockTumblrClient.posts()) that the right arguments are
+        passed through.
+        """
+        self.add_long_blog(50)
+        posts = fetch_tumblr.get_posts("long_blog")
+        # No limit was specified, so we should've gotten the max.
+        self.assertEqual(len(posts), fetch_tumblr.MAX_POSTS)
+        # This is set in add_long_blog; what we're actually doing here
+        # is verifying that the default offset was correct (0).
+        self.assertEqual(posts[0]["timestamp"], 50)
+
+
 """
 Test brainstorm:
     * update finds new posts
@@ -236,6 +261,4 @@ Test brainstorm:
     * update finds all posts when post count > limit
     * update does nothing when there are no posts
     * update changes last_scraped in all the above cases
-    * trivial test for get_posts? (just a passthrough to the mock really)
-    * only text posts are requested
 """
