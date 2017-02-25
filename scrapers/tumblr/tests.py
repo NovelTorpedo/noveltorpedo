@@ -7,6 +7,7 @@ import fetch_tumblr
 
 from datetime import datetime
 from pytz import utc
+from logging import INFO
 from django.test import TestCase
 from django.core.exceptions import ObjectDoesNotExist
 from noveltorpedo import models
@@ -98,7 +99,7 @@ class MockTumblrClient(object):
         arguments that function uses.
 
         Args:
-            blog_name: The short name of a MockBlog.
+            blog_name: The short_name or url of a MockBlog.
             offset: int, how many posts back (from most recent) to start.
             limit: int, how many posts to return.
             type: Ignored, should always be "text".
@@ -117,6 +118,8 @@ class MockTumblrClient(object):
         assert(kwargs["filter"] == "text")
         assert(kwargs["offset"] >= 0)
         assert(0 <= kwargs["limit"] <= fetch_tumblr.MAX_POSTS)
+        # fetch_tumblr will pass blog urls, chop off the ".tumblr.com" part.
+        blog_name = blog_name.split(".", 1)[0]
         all_posts = self.blogs[blog_name].posts
         # In production code I'd store them sorted instead, but in tests the
         # insert:retrieve ratio is so much higher that I think this is faster.
@@ -140,6 +143,8 @@ class TumblrTests(TestCase):
         fetch_tumblr.tumblr = models.Host.objects.get_or_create(**fetch_tumblr.host_attrs)[0]
         # Replace the pytumblr client with a mockup.
         fetch_tumblr.client = MockTumblrClient()
+        # Don't spam us with debug messages.
+        fetch_tumblr.logger.setLevel(INFO)
 
     def add_simple_blog(self):
         """
@@ -265,12 +270,26 @@ class TumblrTests(TestCase):
         posts = fetch_tumblr.get_posts("long_blog", limit=1)
         self.assertEqual(len(posts), 1)
 
+    def test_update_finds_all(self):
+        """
+        Verify that update_story() will get all the posts, even if that takes
+        many queries and doesn't end on an even multiple of the limit.
+        """
+        # A nice big prime number of posts.
+        self.add_long_blog(111)
+        sh = fetch_tumblr.get_or_create_storyhost("long_blog")
+        fetch_tumblr.update_story(sh)
+        post_set = models.StorySegment.objects.filter(story=sh.story)
+        self.assertEqual(post_set.count(), 111)
+        oldest = post_set.earliest("published")
+        newest = post_set.latest("published")
+        self.assertEqual(oldest.title, "Post #1")
+        self.assertEqual(newest.title, "Post #111")
 
 """
 Test brainstorm:
     * update finds new posts
     * update doesn't duplicate old posts
-    * update finds all posts when post count > limit
     * update does nothing when there are no posts
     * update changes last_scraped in all the above cases
 """
