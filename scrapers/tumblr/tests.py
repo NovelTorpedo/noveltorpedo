@@ -178,6 +178,23 @@ class TumblrTests(TestCase):
         nsfw_blog.add_post("A Raunchy Post", "This is not work-appropriate.")
         fetch_tumblr.client.add_blog(nsfw_blog)
 
+    def make_segments(self, blog_name):
+        """
+	Retrieve all story segments corresponding to a blog name from the
+        database. Requires both that the blog has been added to the client
+        with MockTumblrClient.add_blog(), and calls fetch_tumblr.update_story()
+        to create the segments (if the blog has any posts in it).
+
+        Args:
+            blog_name: The short name of a MockBlog.
+
+        Returns:
+            A django QuerySet of StorySegment objects.
+        """
+        sh = fetch_tumblr.get_or_create_storyhost(blog_name)
+        fetch_tumblr.update_story(sh)
+        return models.StorySegment.objects.filter(story=sh.story)
+
     def test_get_create_storyhost(self):
         """
         Verify that get_or_create_storyhost does both of those things and
@@ -277,19 +294,32 @@ class TumblrTests(TestCase):
         """
         # A nice big prime number of posts.
         self.add_long_blog(111)
-        sh = fetch_tumblr.get_or_create_storyhost("long_blog")
-        fetch_tumblr.update_story(sh)
-        post_set = models.StorySegment.objects.filter(story=sh.story)
-        self.assertEqual(post_set.count(), 111)
-        oldest = post_set.earliest("published")
-        newest = post_set.latest("published")
+        segments = self.make_segments("long_blog")
+        self.assertEqual(segments.count(), 111)
+        oldest = segments.earliest("published")
+        newest = segments.latest("published")
         self.assertEqual(oldest.title, "Post #1")
         self.assertEqual(newest.title, "Post #111")
 
+    def test_update_gets_new(self):
+        """
+        Verify that update_story() adds new posts and only new posts.
+        """
+        self.add_simple_blog()
+        segments = self.make_segments("mock_blog")
+        self.assertEqual(segments.count(), 1)
+        # Calling update again doesn't add any posts.
+        segments = self.make_segments("mock_blog")
+        self.assertEqual(segments.count(), 1)
+        # Add another (empty) post, now there should be two.
+        fetch_tumblr.client.blogs["mock_blog"].add_post()
+        segments = self.make_segments("mock_blog")
+        self.assertEqual(segments.count(), 2)
+
+
 """
 Test brainstorm:
-    * update finds new posts
-    * update doesn't duplicate old posts
     * update does nothing when there are no posts
     * update changes last_scraped in all the above cases
+    * update inserts post contents correctly
 """
