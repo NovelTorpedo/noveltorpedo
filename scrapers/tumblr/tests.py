@@ -343,7 +343,17 @@ class TumblrTests(TestCase):
         dt = datetime.fromtimestamp(post["timestamp"]).replace(tzinfo=utc)
         self.assertEqual(segment.published, dt)
 
-"""
-Test brainstorm:
-    * update changes last_scraped in all the above cases
-"""
+    def test_last_scraped(self):
+        """
+        Verify that updating a story changes its last_scraped, whether or not
+        new posts were found.
+        """
+        self.add_simple_blog()
+        sh = fetch_tumblr.get_or_create_storyhost("mock_blog")
+        old_scrape_date = sh.last_scraped
+        fetch_tumblr.update_story(sh)
+        self.assertNotEqual(old_scrape_date, sh.last_scraped)
+        old_scrape_date = sh.last_scraped
+        fetch_tumblr.client.blogs["mock_blog"].add_post()
+        fetch_tumblr.update_story(sh)
+        self.assertNotEqual(old_scrape_date, sh.last_scraped)
