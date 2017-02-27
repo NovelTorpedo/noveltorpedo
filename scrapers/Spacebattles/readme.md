@@ -40,7 +40,31 @@ scrapy crawl sb_spider
 To see results, update the index of the database. Instructions found [here](../../website)
 
 
+
+## Generating Test scenarios
+
+In order to test the scraper, it needs to have access to cached http responses. You can generate a cached response
+scenario with the following command:
+
+```
+scrapy crawl sb_spider -a generate_test=1 -s HTTPCACHE_ENABLED=1 -s HTTPCACHE_DIR=<directoryname>
+```
+
+This will scrape a single thread, and cache all responses in the specified directory name.
+Default directory name is `httpcache`.
+The cache directory can be found in `/noveltorpedo/scrapers/Spacebattles/.scrapy/<directoryname>`
+
 ## Testing the scraper
 
-To quickly test the scraper, offline or online, run the appropriate `runtests` command.
-For the test to work, make sure your are working in same virtual environment is activated.
+To quickly test the scraper, offline or online, run the appropriate `runtests` command
+where <directoryname> is the test directory name mentioned in the previous section.
+
+Windows:
+```
+runtests.bat <directoryname>
+```
+
+Linux:
+```
+./runtests_linux <directoryname>
+```
