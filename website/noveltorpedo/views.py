@@ -7,8 +7,13 @@ from haystack.views import SearchView as HaystackSearchView
 
 
 def register(request):
-    form = RegistrationForm()
-    return render(request, 'noveltorpedo/register.html', {'form':form})
+    if request.method == "POST":
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            return HttpResponse("Registration successful.")
+    else:
+        form = RegistrationForm()
+        return render(request, 'noveltorpedo/register.html', {'form':form})
 
 
 class SearchView(HaystackSearchView):
