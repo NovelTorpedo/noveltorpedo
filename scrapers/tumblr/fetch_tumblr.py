@@ -47,7 +47,7 @@ client = pytumblr.TumblrRestClient(consumer_key, secret_key,
 # Initialize the logger with basic stream output.
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def get_or_create_storyhost(blog):
     """Finds the StoryHost for a Tumblr blog, creating it if necessary.
