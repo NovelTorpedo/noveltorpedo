@@ -36,26 +36,18 @@ class SearchTests(TestCase):
         # Index the new story.
         call_command('update_index')
 
+        def check_response(response):
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Jack Frost')
+            self.assertContains(response, 'The Big One')
+            self.assertContains(response, 'Chapter Three')
+            self.assertContains(response, 'This is how it all went down...')
+
         # Query via author name.
-        response = client.get('/', {'q': 'Jack Frost'})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Jack Frost')
-        self.assertContains(response, 'The Big One')
-        self.assertContains(response, 'Chapter Three')
-        self.assertContains(response, 'This is how it all went down...')
+        check_response(client.get('/', {'q': 'Jack Frost'}))
 
         # Query via story name.
-        response = client.get('/', {'q': 'The Big One'})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Jack Frost')
-        self.assertContains(response, 'The Big One')
-        self.assertContains(response, 'Chapter Three')
-        self.assertContains(response, 'This is how it all went down...')
+        check_response(client.get('/', {'q': 'The Big One'}))
 
         # Query via segment contents.
-        response = client.get('/', {'q': 'Chapter Three'})
-        self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Jack Frost')
-        self.assertContains(response, 'The Big One')
-        self.assertContains(response, 'Chapter Three')
-        self.assertContains(response, 'This is how it all went down...')
+        check_response(client.get('/', {'q': 'Chapter Three'}))
