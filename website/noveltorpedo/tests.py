@@ -27,10 +27,10 @@ class SearchTests(TestCase):
         story.authors.add(author)
 
         segment = StorySegment()
-        segment.published = timezone.now()
         segment.story = story
         segment.title = 'Chapter Three'
         segment.contents = 'Righteous justice was distributed...'
+        segment.published = timezone.now()
         segment.save()
 
         # Index the new story.
