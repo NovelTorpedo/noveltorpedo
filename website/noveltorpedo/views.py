@@ -1,11 +1,13 @@
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.template import loader
 from noveltorpedo.forms import SearchForm
 from haystack.views import SearchView as HaystackSearchView
 
 
 def register(request):
-    return HttpResponse("Registration coming soon(tm).")
+    template = loader.get_template('noveltorpedo/register.html')
+    return HttpResponse(template.render(None, request))
 
 
 class SearchView(HaystackSearchView):
