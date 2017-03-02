@@ -10,18 +10,9 @@ before_install:
   - curl -O https://download.elastic.co/elasticsearch/release/org/elasticsearch/distribution/deb/elasticsearch/2.4.4/elasticsearch-2.4.4.deb && sudo dpkg -i --force-confnew elasticsearch-2.4.4.deb && sudo service elasticsearch restart
   - sudo apt-get install python2.7
 install:
-  - pip install -q elasticsearch
-  - pip2 install -q elasticsearch
-  - pip install -q psycopg2
-  - pip2 install -q psycopg2
-  - pip install -q pyyaml
-  - pip2 install -q pyyaml
-  - pip install -q pytz
-  - pip2 install -q pytz
-  - pip install -q django
-  - pip2 install -q django
-  - pip install -q django-haystack
-  - pip2 install -q django-haystack
+  - pip install -r requirements.txt
+  - pip2 install -r requirements.txt
+  - pip2 install -r scrapers/tumblr/requirements.txt
 before_script:
   - sleep 10
   - psql -c 'CREATE DATABASE noveltorpedo;' -U postgres
