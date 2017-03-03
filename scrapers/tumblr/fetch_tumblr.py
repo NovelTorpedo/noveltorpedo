@@ -12,7 +12,10 @@ import logging
 
 # Library for API calls, and secondary file with authentication keys.
 import pytumblr
-from secrets import consumer_key, secret_key, oauth_token, oauth_secret
+try:
+    from secrets import consumer_key, secret_key, oauth_token, oauth_secret
+except ImportError:
+    print("Couldn't import secrets. This is normal if you're running tests.")
 
 # All of this is just so we can get and use the Django models for DB objects.
 import django
