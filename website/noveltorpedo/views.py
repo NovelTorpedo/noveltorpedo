@@ -10,6 +10,8 @@ def register(request):
     if request.method == "POST":
         form = RegistrationForm(request.POST)
         if form.is_valid():
+            # Creates a new user upon valid input.
+            form.save()
             return HttpResponse("Registration successful.")
     else:
         form = RegistrationForm()
