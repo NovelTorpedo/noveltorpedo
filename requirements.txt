@@ -1,0 +1,6 @@
+elasticsearch
+psycopg2
+pyyaml
+pytz
+django
+django-haystack

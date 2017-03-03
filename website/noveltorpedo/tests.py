@@ -1,7 +1,8 @@
 from django.test import TestCase
 from django.test import Client
 from noveltorpedo.models import *
-import unittest
+from django.utils import timezone
+from django.core.management import call_command
 
 client = Client()
 
@@ -13,49 +14,44 @@ class SearchTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'NovelTorpedo Search')
 
-
-class ModelTests(TestCase):
-
-    @unittest.skip('Until updated for current models.')
-    def test_that_models_insert_and_retreieve(self):
-        author_name = "test name"
-        story_title = "The Big Lebowski"
-        story_contents = "A long time ago in a galaxy far far away"
-
+    def test_insertion_and_querying_of_data(self):
+        # Create a new story in the database.
         author = Author()
-        author.name = author_name
+        author.name = 'Jack Frost'
         author.save()
 
         story = Story()
-        story.title = story_title
-        story.contents = story_contents
+        story.title = 'The Big One'
         story.save()
+
         story.authors.add(author)
 
-        # Grab the story by title.
-        story = Story.objects.filter(title=story_title).first()
-        self.assertEqual(story.title, story_title)
-        self.assertEqual(story.contents, story_contents)
+        segment = StorySegment()
+        segment.story = story
+        segment.title = 'Chapter Three'
+        segment.contents = 'Righteous justice was distributed...'
+        segment.published = timezone.now()
+        segment.save()
 
-        # Grab the author from the story.
-        author = story.authors.first()
-        self.assertEqual(author.name, author_name)
+        # Index the new story.
+        call_command('update_index')
 
-        # Grab the story by contents.
-        story = Story.objects.filter(contents=story_contents).first()
-        self.assertEqual(story.title, story_title)
-        self.assertEqual(story.contents, story_contents)
+        def check_response(response, highlighted_words=[]):
+            self.assertEqual(response.status_code, 200)
+            self.assertContains(response, 'Jack Frost')
+            self.assertContains(response, 'The Big One')
 
-        # Grab the author from the story.
-        author = story.authors.first()
-        self.assertEqual(author.name, author_name)
+            for word in highlighted_words:
+                self.assertContains(response, '<span class="highlighted">' + word + '</span>')
 
-        # Grab the story by author.
-        author = Author.objects.filter(name = author_name).first()
-        story = Story.objects.filter(authorsgit = author).first()
-        self.assertEqual(story.title, story_title)
-        self.assertEqual(story.contents, story_contents)
+        # Query via author name.
+        check_response(client.get('/', {'q': 'Jack Frost'}))
 
-        # Grab the author from the story.
-        author = story.authors.first()
-        self.assertEqual(author.name, author_name)
+        # Query via story title.
+        check_response(client.get('/', {'q': 'The Big One'}))
+
+        # Query via segment title.
+        check_response(client.get('/', {'q': 'Chapter Three'}), ['Chapter', 'Three'])
+
+        # Query via segment contents.
+        check_response(client.get('/', {'q': 'Righteous justice'}, ['Righteous', 'justice']))

@@ -12,7 +12,10 @@ import logging
 
 # Library for API calls, and secondary file with authentication keys.
 import pytumblr
-from secrets import consumer_key, secret_key, oauth_token, oauth_secret
+try:
+    from secrets import consumer_key, secret_key, oauth_token, oauth_secret
+except ImportError:
+    print("Couldn't import secrets. This is normal if you're running tests.")
 
 # All of this is just so we can get and use the Django models for DB objects.
 import django
@@ -41,13 +44,16 @@ host_attrs = {"url": "tumblr.com",
               "spider": "tumblr/fetch_tumblr.py",
               "wait": 1}
 tumblr = models.Host.objects.get_or_create(**host_attrs)[0]
-client = pytumblr.TumblrRestClient(consumer_key, secret_key,
-                                   oauth_token, oauth_secret)
+try:
+    client = pytumblr.TumblrRestClient(consumer_key, secret_key,
+                                       oauth_token, oauth_secret)
+except NameError:
+    print("Couldn't initialize client. This is normal if you're running tests.")
 
 # Initialize the logger with basic stream output.
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.StreamHandler())
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 def get_or_create_storyhost(blog):
     """Finds the StoryHost for a Tumblr blog, creating it if necessary.
