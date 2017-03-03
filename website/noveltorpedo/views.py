@@ -13,7 +13,7 @@ def register(request):
             return HttpResponse("Registration successful.")
     else:
         form = RegistrationForm()
-        return render(request, 'noveltorpedo/register.html', {'form':form})
+    return render(request, 'noveltorpedo/register.html', {'form':form})
 
 
 class SearchView(HaystackSearchView):
