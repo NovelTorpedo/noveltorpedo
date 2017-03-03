@@ -44,8 +44,11 @@ host_attrs = {"url": "tumblr.com",
               "spider": "tumblr/fetch_tumblr.py",
               "wait": 1}
 tumblr = models.Host.objects.get_or_create(**host_attrs)[0]
-client = pytumblr.TumblrRestClient(consumer_key, secret_key,
-                                   oauth_token, oauth_secret)
+try:
+    client = pytumblr.TumblrRestClient(consumer_key, secret_key,
+                                       oauth_token, oauth_secret)
+except NameError:
+    print("Couldn't initialize client. This is normal if you're running tests.")
 
 # Initialize the logger with basic stream output.
 logger = logging.getLogger(__name__)
