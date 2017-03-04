@@ -24,10 +24,10 @@ class StorySpider(scrapy.Spider):
 
     # these variables are used to generate testing situations
     generate_test = None
-    test_dir = None
+    test_url = None
     custom_settings = {
         "HTTPCACHE_EXPIRATION_SECS": 0,
-        "HTTPCACHE_DIR": 'wut',
+        "HTTPCACHE_DIR": 'httpcache',
         "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage'
     }
 
@@ -38,9 +38,10 @@ class StorySpider(scrapy.Spider):
     HOST, created = Host.objects.get_or_create(url="www.spacebattles.com", spider="sb_spider", wait=5)
     HOST.save()
 
-    def __init__(self, generate_test=None, *args, **kwargs):
+    def __init__(self, generate_test=None, test_url=None, *args, **kwargs):
         super(StorySpider, self).__init__(*args, **kwargs)
         self.generate_test = generate_test
+        self.test_url = test_url
 
     def start_requests(self):
         urls = [
@@ -85,13 +86,27 @@ class StorySpider(scrapy.Spider):
                 next_page_link = response.urljoin(next_page_link)
                 yield scrapy.Request(next_page_link, callback=self.loop_pages, priority=0)
         else:
+            """
+                This section activates if self.generate_test is not None.
+                A thread url is required to be provided to generate a test scenario out of that
+                thread.
+                It scans the site looking for this thread, and scrapes it.
+                If it doesn't find it, it scans the next page.
+            """
             print("\n\tGENERATING TEST SCENARIO\n")
-            try:
-                (url, story) = urls_stories[0]
-            except IndexError:
-                (url, story) = self.update_list[0]
+            for (url, story) in urls_stories:
+                if url == self.test_url:
+                    yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
+                    return
 
-            yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
+            for (url, story) in self.update_list:
+                if url == self.test_url:
+                    yield scrapy.Request(url, callback=self.scan_thread, priority=0, meta={"story_item": story})
+                    return
+
+            next_page_link = response.urljoin(next_page_link)
+            yield scrapy.Request(next_page_link, callback=self.loop_pages, priority=0)
+
 
     def get_thread_urls(self, response):
 
