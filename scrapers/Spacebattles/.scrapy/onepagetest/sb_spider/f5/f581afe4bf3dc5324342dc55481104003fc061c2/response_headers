@@ -1,0 +1,10 @@
+Strict-Transport-Security: max-age=31536000
+Set-Cookie: xf_session=ec80504cec66ad2a32a9204abe796d44; path=/; secure; HttpOnly
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Server: nginx
+Last-Modified: Fri, 03 Mar 2017 21:12:22 GMT
+Location: https://forums.spacebattles.com/forums/creative-writing.18/
+Cache-Control: private, max-age=0
+Date: Fri, 03 Mar 2017 21:12:22 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Type: text/html; charset=UTF-8

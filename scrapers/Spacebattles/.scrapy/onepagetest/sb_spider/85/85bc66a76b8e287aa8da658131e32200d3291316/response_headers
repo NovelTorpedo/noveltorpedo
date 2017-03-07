@@ -1,0 +1,11 @@
+Strict-Transport-Security: max-age=31536000
+Content-Encoding: gzip
+Set-Cookie: xf_session=7525394d91b810541358a702ab96ca66; path=/; secure; HttpOnly
+Expires: Thu, 19 Nov 1981 08:52:00 GMT
+Vary: Accept-Encoding
+Server: nginx
+Last-Modified: Fri, 03 Mar 2017 21:14:15 GMT
+Cache-Control: private, max-age=0
+Date: Fri, 03 Mar 2017 21:14:15 GMT
+X-Frame-Options: SAMEORIGIN
+Content-Type: text/html; charset=UTF-8
