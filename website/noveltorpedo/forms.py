@@ -4,6 +4,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import BaseForm
 from noveltorpedo.models import StoryHost
+from noveltorpedo.fetch_tumblr import get_or_create_storyhost
 import requests
 
 
@@ -32,14 +33,18 @@ class RegistrationForm(UserCreationForm):
 
 class TumblrAddForm(BaseForm):
 
-    name = forms.CharField(required=True)
+    name = forms.CharField(required=True, label='Tumblr Username')
 
     def clean_name(self):
         name = self.cleaned_data.get("name")
         url = name + '.tumblr.com'
 
         if StoryHost.objects.filter(url=url).count():
-            raise forms.ValidationError('We already be trackin dat')
+            raise forms.ValidationError('We\'re already tracking stories from ' + name + ' on Tumblr.')
 
         if requests.get(url).status_code != 200:
-            raise forms.ValidationError('That aint no Tumblr')
+            raise forms.ValidationError(name + ' is not a valid username on Tumblr')
+
+    def save(self):
+        get_or_create_storyhost(name)
+
