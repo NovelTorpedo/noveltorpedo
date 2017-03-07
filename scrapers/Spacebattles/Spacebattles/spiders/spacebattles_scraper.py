@@ -31,7 +31,7 @@ class StorySpider(scrapy.Spider):
         "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage'
     }
 
-    # this will be a queue of tuples (of story objects and urls)
+    # this will be a list of tuples (of story objects and urls)
     update_list = []
 
     # try to get the host object for this Host. Create if not found.
@@ -106,7 +106,6 @@ class StorySpider(scrapy.Spider):
 
             next_page_link = response.urljoin(next_page_link)
             yield scrapy.Request(next_page_link, callback=self.loop_pages, priority=0)
-
 
     def get_thread_urls(self, response):
 

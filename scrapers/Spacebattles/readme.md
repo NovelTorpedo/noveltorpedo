@@ -43,14 +43,21 @@ To see results, update the index of the database. Instructions found [here](../.
 
 ## Generating Test scenarios
 
+Scraper must have the following settings in settings.py, or overridden directly in scapbattles_scraper.py:
+```
+"HTTPCACHE_EXPIRATION_SECS": 0,
+"HTTPCACHE_DIR": 'httpcache',
+"HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+```
+
 In order to test the scraper, it needs to have access to cached http responses. You can generate a cached response
 scenario with the following command:
 
 ```
-scrapy crawl sb_spider -a generate_test=1 -s HTTPCACHE_ENABLED=1 -s HTTPCACHE_DIR=<directoryname>
+scrapy crawl sb_spider -a generate_test=1 -a test_url=<thread url> -s HTTPCACHE_ENABLED=1 -s HTTPCACHE_DIR=<directoryname>
 ```
 
-This will scrape a single thread, and cache all responses in the specified directory name.
+This will scrape the specified thread, and cache all responses in the specified directory name.
 Default directory name is `httpcache`.
 The cache directory can be found in `/noveltorpedo/scrapers/Spacebattles/.scrapy/<directoryname>`
 
