@@ -349,7 +349,8 @@ class StorySpider(scrapy.Spider):
         # oldest possible date.
 
         # ...various errors due to unicode problems....due to the data coming from either
-        # the database, or the website.
+        # the database, or the website. Not quite sure what is going on here, whether it's my
+        # system, or not. But this code makes it work for the lowest common denominator.
         try:
             story_segs = StorySegment.objects.filter(story=story).order_by("-published")[0]
             try:
