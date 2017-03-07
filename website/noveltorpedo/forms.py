@@ -45,6 +45,8 @@ class TumblrAddForm(BaseForm):
         if requests.get(url).status_code != 200:
             raise forms.ValidationError(name + ' is not a valid username on Tumblr')
 
+        return name
+
     def save(self):
-        get_or_create_storyhost(name)
+        get_or_create_storyhost(self.name)
 

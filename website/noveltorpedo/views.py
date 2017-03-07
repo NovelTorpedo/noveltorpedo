@@ -3,6 +3,7 @@ from django.http import HttpResponse
 from django.template import loader
 from noveltorpedo.forms import RegistrationForm
 from noveltorpedo.forms import SearchForm
+from noveltorpedo.forms import TumblrAddForm
 from haystack.views import SearchView as HaystackSearchView
 
 
@@ -17,6 +18,17 @@ def register(request):
         form = RegistrationForm()
     return render(request, 'noveltorpedo/register.html', {'form': form})
 
+def submit_story_tumblr(request):
+    if request.method == "POST":
+        form = TumblrAddForm(request.POST)
+        if form.is_valid():
+            form.clean_name()
+            form.save()
+            return HttpResponse("Stories from submitted successfully.")
+    else:
+        form = TumblrAddForm()
+
+    return render(request, 'noveltorpedo/submit.html', {'form': form})
 
 class SearchView(HaystackSearchView):
     def __init__(self, template=None, load_all=True, searchqueryset=None):
