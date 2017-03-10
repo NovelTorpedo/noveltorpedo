@@ -15,8 +15,11 @@
                     NovelTorpedo
                 </a>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href="{%  url 'noveltorpedo:login' %}">Login</a></li>
-                    <li><a href="{%  url 'noveltorpedo:logout' %}">Logout</a></li>
+                    {% if not user.is_authenticated %}
+                        <li><a href="{%  url 'noveltorpedo:login' %}">Login</a></li>
+                    {% else %}
+                        <li><a href="{%  url 'noveltorpedo:logout' %}">Logout</a></li>
+                    {% endif %}
                     <li><a href="{%  url 'noveltorpedo:register' %}">Register</a></li>
                 </ul>
             </div>
