@@ -14,12 +14,12 @@
                     <img src="{% static 'img/NovelTorpedo.png' %}" />
                     NovelTorpedo
                 </a>
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="{%  url 'noveltorpedo:login' %}">Login</a></li>
+                    <li><a href="{%  url 'noveltorpedo:logout' %}">Logout</a></li>
+                    <li><a href="{%  url 'noveltorpedo:register' %}">Register</a></li>
+                </ul>
             </div>
-            <div align="right">
-                    <a href="{%  url 'noveltorpedo:login' %}">Login</a><br>
-                    <a href="{%  url 'noveltorpedo:logout' %}">Logout</a><br>
-                    <a href="{%  url 'noveltorpedo:register' %}">Register</a><br>
-                </div>
         </div>
 {#        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">#}
 {#            <ul class="nav navbar-nav">#}
