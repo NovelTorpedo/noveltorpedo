@@ -1,9 +1,20 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.template import loader
-from noveltorpedo.forms import RegistrationForm
+from noveltorpedo.forms import LoginForm, RegistrationForm
 from noveltorpedo.forms import SearchForm
 from haystack.views import SearchView as HaystackSearchView
+
+
+def login(request):
+    form = LoginForm()
+    # Needs to implement logic for handling logins
+    return render(request, 'noveltorpedo/login.html', {'form': form})
+
+
+def logout(request):
+    # Needs to be implemented
+    return HttpResponse("This page will log you out in the future.")
 
 
 def register(request):
