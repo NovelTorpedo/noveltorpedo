@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.contrib.auth import login as auth_login
+from django.contrib.auth import authenticate, login as auth_login
 from django.http import HttpResponseRedirect
 from noveltorpedo.forms import RegistrationForm, SearchForm
 from haystack.views import SearchView as HaystackSearchView
@@ -13,6 +13,9 @@ def register(request):
             user = form.save()
 
             # Login this new user automatically.
+            user = authenticate(username=form.cleaned_data['username'],
+                                password=form.cleaned_data['password1'],
+                                )
             auth_login(request, user)
             return HttpResponseRedirect('/')
     else:
