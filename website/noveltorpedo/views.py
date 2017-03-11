@@ -17,7 +17,7 @@ def register(request):
             return HttpResponseRedirect('/')
     else:
         form = RegistrationForm()
-    return render(request, 'noveltorpedo/register.html', {'form': form})
+    return render(request, 'noveltorpedo/auth/register.html', {'form': form})
 
 
 class SearchView(HaystackSearchView):
