@@ -4,6 +4,7 @@ from django.template import loader
 from noveltorpedo.forms import RegistrationForm
 from noveltorpedo.forms import SearchForm
 from haystack.views import SearchView as HaystackSearchView
+from django.contrib.auth import login as auth_login
 
 
 def register(request):
@@ -11,7 +12,10 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             # Creates a new user upon valid input.
-            form.save()
+            user = form.save()
+
+            # Login this new user automatically.
+            auth_login(request, user)
             return HttpResponse("Registration successful.")
     else:
         form = RegistrationForm()
