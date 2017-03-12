@@ -15,6 +15,7 @@ class AuthTests(TestCase):
         response = client.get('/register')
         self.assertContains(response, 'Login')
         self.assertNotContains(response, 'Logout')
+        self.assertContains(response, 'NovelTorpedo Registration')
 
         # Ensure validation is working.
         response = client.post('/register', {
@@ -43,6 +44,13 @@ class AuthTests(TestCase):
         user = User.objects.last()
         self.assertEquals('johndoe', user.username)
         self.assertEquals('john@test.com', user.email)
+
+    def test_login(self):
+        # We can see the 'Login' button, but not the 'Logout' button since we haven't registered yet.
+        response = client.get('/login/')
+        self.assertContains(response, 'Login')
+        self.assertNotContains(response, 'Logout')
+        self.assertContains(response, 'NovelTorpedo Login')
 
 
 class SearchTests(TestCase):
