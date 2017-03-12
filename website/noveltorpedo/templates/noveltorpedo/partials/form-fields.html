@@ -1,0 +1,16 @@
+{% load i18n widget_tweaks %}
+
+{% for field in form %}
+    <div class="form-group {% if field.errors %}has-error{% endif %}">
+        <label for="id_{{ field.name }}">{{ field.label }}</label>
+        {% render_field field class+="form-control" placeholder=field.label %}
+        {% for error in field.errors %}
+            <span class="help-block">
+                {{ error }}
+            </span>
+        {% endfor %}
+        {% if field.help_text %}
+            <span class="help-block">{{ field.help_text }}</span>
+        {% endif %}
+    </div>
+{% endfor %}
