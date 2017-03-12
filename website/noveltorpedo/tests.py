@@ -7,6 +7,38 @@ from django.core.management import call_command
 client = Client()
 
 
+class AuthTests(TestCase):
+
+    def test_registration(self):
+        # We can see the 'Login' button, but not the 'Logout' button since we haven't registered yet.
+        response = client.get('/register')
+        self.assertContains(response, 'Login')
+        self.assertNotContains(response, 'Logout')
+
+        # Ensure validation is working.
+        response = client.post('/register', {
+            'username': 'johndoe',
+            'email': 'john@test.com',
+            'password1': 'thisisagoodpassword123',
+            'password2': 'thisisapassword123',
+        })
+        self.assertContains(response, 'The two password fields didn&#39;t match.')
+
+        # Ensure a successful registration redirects back to the home page with the user automatically logged in.
+        response = client.post('/register', {
+            'username': 'johndoe',
+            'email': 'john@test.com',
+            'password1': 'thisisagoodpassword123',
+            'password2': 'thisisagoodpassword123',
+        }, follow=True)
+        self.assertRedirects(response, '/')
+
+        # Now the user should be logged in, and so should see the 'Logout' button.
+        response = client.get('/register')
+        self.assertContains(response, 'Logout')
+        self.assertNotContains(response, 'Login')
+
+
 class SearchTests(TestCase):
 
     def test_that_the_front_page_loads_properly(self):
