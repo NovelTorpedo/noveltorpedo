@@ -1,8 +1,10 @@
+from django.contrib import auth
+from django.core.management import call_command
 from django.test import TestCase
 from django.test import Client
-from noveltorpedo.models import *
 from django.utils import timezone
-from django.core.management import call_command
+from noveltorpedo.models import *
+from django.contrib.auth.models import User
 
 client = Client()
 
@@ -37,6 +39,11 @@ class AuthTests(TestCase):
         response = client.get('/register')
         self.assertContains(response, 'Logout')
         self.assertNotContains(response, 'Login')
+
+        # Sanity check that the user's information was properly saved.
+        user = User.objects.last()
+        self.assertEquals('johndoe', user.username)
+        self.assertEquals('john@test.com', user.email)
 
 
 class SearchTests(TestCase):
