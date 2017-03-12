@@ -17,7 +17,7 @@ def run_test():
         Before you run the test, make sure httpcaching is enabled
         and IGNORE_MISSING is set to true.
 
-        make sure to reset the db before running the test
+        Make sure to run reset_db before running the test.
     """
     reset_database()
 
@@ -28,7 +28,7 @@ def run_test():
     settings["HTTPCACHE_IGNORE_MISSING"] = 1
 
     # The following value should be set to the test you want to run!
-    settings["HTTPCACHE_DIR"] = "onepagetest"
+    settings["HTTPCACHE_DIR"] = "twopagetest"
 
     process = CrawlerProcess(settings)
 
@@ -41,10 +41,10 @@ def run_test():
 
     # 5 is the expected number of entries in the table for this test.
     # exit status 1 if failed, 0 if success
-    if object_count is not 5:
+    if object_count is not 12:
+        print("TEST <TWOPAGETEST> FAILED. Expected [{0}] story segments, received [{1}]".format(12, object_count))
         sys.exit(1)
 
+    print("TEST <TWOPAGETEST> PASSED. Expected [{0}] story segments, received [{1}]".format(12, object_count))
     sys.exit(0)
 
-if __name__ == "__main__":
-    run_test()
