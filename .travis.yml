@@ -20,5 +20,6 @@ before_script:
   - python website/manage.py seed
   - python website/manage.py update_index
 script:
-  - python website/manage.py test
+  - cd website && python manage.py test
+  - cd -
   - python2 website/manage.py test scrapers/tumblr

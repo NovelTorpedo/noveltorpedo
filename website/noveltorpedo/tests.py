@@ -13,6 +13,8 @@ class SearchTests(TestCase):
         response = client.get('/')
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'NovelTorpedo Search')
+        self.assertContains(response, 'Login')
+        self.assertContains(response, 'Register')
 
     def test_insertion_and_querying_of_data(self):
         # Create a new story in the database.
