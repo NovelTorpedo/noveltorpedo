@@ -41,7 +41,6 @@ class StorySpider(scrapy.Spider):
     test_url = None
     custom_settings = {
         "HTTPCACHE_EXPIRATION_SECS": 0,
-        "HTTPCACHE_DIR": 'httpcache',
         "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage'
     }
 
