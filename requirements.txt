@@ -4,4 +4,5 @@ pyyaml
 pytz
 django
 django-haystack
+django-widget-tweaks
 requests

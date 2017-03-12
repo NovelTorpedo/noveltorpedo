@@ -1,8 +1,7 @@
 from django.shortcuts import render
-from django.http import HttpResponse
-from django.template import loader
-from noveltorpedo.forms import RegistrationForm
-from noveltorpedo.forms import SearchForm
+from django.contrib.auth import login as auth_login
+from django.http import HttpResponseRedirect
+from noveltorpedo.forms import RegistrationForm, SearchForm
 from haystack.views import SearchView as HaystackSearchView
 
 
@@ -11,11 +10,14 @@ def register(request):
         form = RegistrationForm(request.POST)
         if form.is_valid():
             # Creates a new user upon valid input.
-            form.save()
-            return HttpResponse("Registration successful.")
+            user = form.save()
+
+            # Login this new user automatically.
+            auth_login(request, user)
+            return HttpResponseRedirect('/')
     else:
         form = RegistrationForm()
-    return render(request, 'noveltorpedo/register.html', {'form': form})
+    return render(request, 'noveltorpedo/auth/register.html', {'form': form})
 
 
 class SearchView(HaystackSearchView):

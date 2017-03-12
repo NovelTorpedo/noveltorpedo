@@ -16,8 +16,16 @@ Including another URLconf
 """
 from django.conf.urls import include, url
 from django.contrib import admin
+from django.contrib.auth import views
+
 
 urlpatterns = [
     url(r'^', include('noveltorpedo.urls')),
+    url(r'^login/$', views.login, name='login', kwargs={'template_name': 'noveltorpedo/auth/login.html'}),
+    url(r'^password_reset/$', views.password_reset, name='password_reset',
+        kwargs={'template_name': 'noveltorpedo/auth/password_reset.html'}),
+    url(r'^password_reset/done/$', views.password_reset_done, name='password_reset_done',
+        kwargs={'template_name': 'noveltorpedo/auth/password_reset_done.html'}),
+    url(r'^', include('django.contrib.auth.urls')),
     url(r'^admin/', admin.site.urls),
 ]
