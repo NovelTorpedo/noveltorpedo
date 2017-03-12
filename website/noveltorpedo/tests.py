@@ -1,4 +1,3 @@
-from django.contrib import auth
 from django.core.management import call_command
 from django.test import TestCase
 from django.test import Client
