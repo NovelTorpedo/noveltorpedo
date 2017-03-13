@@ -81,5 +81,5 @@ To run these, ensure you are in the `noveltorpedo/scrapers/Spacebattles` directo
 
 Run the following command:
 ```
-
+python tests/<test>.py
 ```
