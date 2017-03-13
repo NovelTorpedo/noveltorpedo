@@ -25,5 +25,5 @@ script:
   - cd -
   - python2 website/manage.py test scrapers/tumblr
   - cd -
-  - cd scrapers/Spacebattles $$ python tests/test_onepage.py && python tests/test_twopage.py
+  - cd scrapers/Spacebattles && python tests/test_onepage.py && python tests/test_twopage.py
 
