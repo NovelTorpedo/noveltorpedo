@@ -366,15 +366,19 @@ class StorySpider(scrapy.Spider):
         # system, or not. But this code makes it work for the lowest common denominator.
         try:
             story_segs = StorySegment.objects.filter(story=story).order_by("-published")[0]
+            """
             try:
                 print ("lastdate for {0}: {1}".format(story.title, story_segs.published))
             except UnicodeEncodeError:
                 print ("lastdate for {0}: {1}".format(story.title.encode('utf-8'), story_segs.published))
+            """
             return story_segs.published
         except IndexError:
+            """
             try:
                 print(" no lastdate found for story [{0}]".format(story.title))
             except UnicodeEncodeError:
                 print(" no lastdate found for story [{0}]".format(story.title.encode('utf-8')))
+            """
             return datetime.min.replace(tzinfo=utc)
 
