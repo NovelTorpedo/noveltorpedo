@@ -1,6 +1,7 @@
 from scrapy.crawler import CrawlerProcess
 from scrapy.crawler import CrawlerRunner
 import time
+import scrapy
 from scrapy.utils.project import get_project_settings
 from twisted.internet import reactor
 import sys
@@ -9,18 +10,18 @@ import django
 from reset_db import reset_database
 from django.test import TestCase
 
-sys.path.insert(0, "../../website")
+sys.path.insert(0, "../../../website")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 from noveltorpedo.models import *
 
 
-class SpaceBattlesTests(TestCase):
+class SpaceBattlesTests():
 
     # do before each test...
-    def __init__(self, *args, **kwargs):
-        super(SpaceBattlesTests, self).__init__(*args, **kwargs)
+    def __init__(self):
+        self.settings = {}
 
     def setUp(self):
         self.settings = get_project_settings()
@@ -47,9 +48,17 @@ class SpaceBattlesTests(TestCase):
         reactor.run()
 
         object_count = StorySegment.objects.count()
+
+        if object_count == 5:
+            print("PASS: Expected {0} story segments, received {1}".format(5, object_count))
+            sys.exit(0)
+        else:
+            print("FAIL <test_onepage>: Expected {0} story segments, received {1}".format(5, object_count))
+            sys.exit(1)
+
         # 5 is the expected number of entries in the table for this test.
         # exit status 1 if failed, 0 if success
-        self.assertEqual(object_count, 5)
+        # self.assertEqual(object_count, 5)
         # time.sleep(5)
 
     def atest_twopage(self):
@@ -68,4 +77,9 @@ class SpaceBattlesTests(TestCase):
         # process.stop()
         # 5 is the expected number of entries in the table for this test.
         # exit status 1 if failed, 0 if success
-        self.assertEqual(object_count, 12)
+        # self.assertEqual(object_count, 12)
+
+if __name__=="__main__":
+    test = SpaceBattlesTests()
+    test.setUp()
+    test.test_onepage()

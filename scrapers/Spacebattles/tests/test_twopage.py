@@ -16,32 +16,17 @@ django.setup()
 from noveltorpedo.models import *
 
 
-class TwoPageTests(TestCase):
+class TwoPageTests():
     """
         Before you run the test, make sure httpcaching is enabled
         and IGNORE_MISSING is set to true.
 
         Make sure to run reset_db before running the test.
     """
-    """
-    def __init__(self, *args, **kwargs):
-        super(TwoPageTests, self).__init__(*args, **kwargs)
-        reset_database()
 
-        self.settings = get_project_settings()
-        self.settings["HTTPCACHE_ENABLED"] = 1
-        self.settings["HTTPCACHE_EXPIRATION_SECS"] = 0
-        self.settings["HTTPCACHE_STORAGE"] = "scrapy.extensions.httpcache.FilesystemCacheStorage"
-        self.settings["HTTPCACHE_IGNORE_MISSING"] = 1
-        self.settings["HTTPCACHE_DIR"] = "twopagetest"
-
-        process = CrawlerProcess(self.settings)
-
-        # print(settings)
-
-        process.crawl('sb_spider')
-        process.start()
-    """
+    def __init__(self):
+        self.settings = {}
+        self.expected_num_seg = 12
 
     def setUp(self):
         """
@@ -58,7 +43,7 @@ class TwoPageTests(TestCase):
 
         reset_database()
 
-    def atest_twopage(self):
+    def test_twopage(self):
         # The following value should be set to the test you want to run!
         # time.sleep(5)
         # process = CrawlerProcess(self.settings)
@@ -71,7 +56,16 @@ class TwoPageTests(TestCase):
 
         object_count = StorySegment.objects.count()
 
-        # 5 is the expected number of entries in the table for this test.
-        # exit status 1 if failed, 0 if success
-        self.assertEqual(object_count, 12,
-                         "ERROR: expected {0} story segments, found {1}".format(12, object_count))
+        if object_count == self.expected_num_seg:
+            print("PASS: Expected {0} story segments, received {1}".format(self.expected_num_seg,
+                                                                           object_count))
+            sys.exit(0)
+        else:
+            print("FAIL <test_onepage>: Expected {0} story segments, received {1}".format(self.expected_num_seg,
+                                                                                          object_count))
+            sys.exit(1)
+
+if __name__=="__main__":
+    test = TwoPageTests()
+    test.setUp()
+    test.test_twopage()
