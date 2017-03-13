@@ -75,3 +75,11 @@ Linux:
 ```
 ./runtests_linux <directoryname>
 ```
+
+There are several tests already included in `noveltorpedo/scrapers/Spacebattles/tests/`.
+To run these, ensure you are in the `noveltorpedo/scrapers/Spacebattles` directory.
+
+Run the following command:
+```
+
+```
