@@ -46,7 +46,6 @@ To see results, update the index of the database. Instructions found [here](../.
 Scraper must have the following settings in settings.py, or overridden directly in scapbattles_scraper.py:
 ```
 "HTTPCACHE_EXPIRATION_SECS": 0,
-"HTTPCACHE_DIR": 'httpcache',
 "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage'
 ```
 
