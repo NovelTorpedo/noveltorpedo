@@ -14,6 +14,7 @@ install:
   - pip install -r requirements.txt
   - pip2 install -r requirements.txt
   - pip2 install -r scrapers/tumblr/requirements.txt
+  - pip install -r scrapers/Spacebattles/requirements_linux.txt
 before_script:
   - sleep 10
   - psql -c 'CREATE DATABASE noveltorpedo;' -U postgres
@@ -23,3 +24,6 @@ script:
   - cd website && python manage.py test
   - cd -
   - python2 website/manage.py test scrapers/tumblr
+  - cd -
+  - cd scrapers/Spacebattles $$ python tests/test_onepage.py && python tests/test_twopage.py
+
