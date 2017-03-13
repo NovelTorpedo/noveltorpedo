@@ -23,17 +23,7 @@ If `node --version` doesn't work, you may just need to:
 sudo ln -s /usr/bin/nodejs /usr/bin/node
 ```
 
-Install Python dependencies:
-```bash
-sudo apt update
-sudo apt install python3-django             # 1.8.7-1ubuntu5.4
-sudo apt install python3-elasticsearch      # 1.6.0-1
-sudo apt install python3-yaml               # 3.11-3build1
-sudo apt install python3-psycopg2           # 2.6.1-1build2
-sudo apt install python3-pip
-sudo pip3 install django-haystack           # Latest (since apt `python3-django-haystack` is out-of-date)
-sudo pip3 install pytz
-```
+Create a virtual environment and install all of the Python packages defined in `requirements.txt`.
 
 Install PostgreSQL and create database:
 ```bash

@@ -1,5 +1,16 @@
 #!/usr/bin/python
 
+"""
+Tumblr post fetcher for NovelTorpedo
+https://github.com/NovelTorpedo/noveltorpedo
+
+(c) 2017 Brook Boese, Finn Ellis, Jacob Martin, Matthew Popescu,
+    Rubin Stricklin, and Sage Callon.
+
+You are free to use, copy, modify, and distribute this file, with attribution,
+under the terms of the MIT license. See LICENSE.txt for details.
+"""
+
 # For inserting well-formed TZ-aware post dates into the database.
 from datetime import datetime, timedelta
 from pytz import utc
@@ -15,7 +26,10 @@ import pytumblr
 try:
     from secrets import consumer_key, secret_key, oauth_token, oauth_secret
 except ImportError:
-    print("Couldn't import secrets. This is normal if you're running tests.")
+    print("Couldn't import authorization secrets. This is normal if you're "
+           "running tests. If you aren't running tests, you need to create a "
+           "secrets.py with your Tumblr authentication details; see README.md "
+           "for more information.")
 
 # All of this is just so we can get and use the Django models for DB objects.
 import django
