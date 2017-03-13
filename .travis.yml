@@ -2,6 +2,7 @@ language: python
 branches:
   - master
   - travis
+  - SB_scraper
 services:
   - postgresql
 python:
