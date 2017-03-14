@@ -29,7 +29,7 @@ def submit_story_tumblr(request):
     else:
         form = TumblrAddForm()
 
-    return render(request, 'noveltorpedo/submit.html', {'form': form})
+    return render(request, 'submit/submit.html', {'form': form})
 
 class SearchView(HaystackSearchView):
     def __init__(self, template=None, load_all=True, searchqueryset=None):
