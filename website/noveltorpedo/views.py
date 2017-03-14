@@ -19,17 +19,18 @@ def register(request):
         form = RegistrationForm()
     return render(request, 'noveltorpedo/auth/register.html', {'form': form})
 
+
 def submit_story_tumblr(request):
     if request.method == "POST":
         form = TumblrAddForm(request.POST)
         if form.is_valid():
-            form.clean_name()
             form.save()
-            return HttpResponse("Stories from submitted successfully.")
+            return HttpResponse("Story submitted successfully.")
     else:
         form = TumblrAddForm()
 
-    return render(request, 'submit/submit.html', {'form': form})
+    return render(request, 'noveltorpedo/submit-tumblr.html', {'form': form})
+
 
 class SearchView(HaystackSearchView):
     def __init__(self, template=None, load_all=True, searchqueryset=None):
