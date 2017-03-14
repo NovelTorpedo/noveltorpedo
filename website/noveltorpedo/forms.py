@@ -34,7 +34,7 @@ class TumblrAddForm(Form):
 
     def clean_name(self):
         name = self.cleaned_data.get("name")
-        url = name + '.tumblr.com'
+        url = 'http://' + name + '.tumblr.com'
 
         if StoryHost.objects.filter(url=url).count():
             raise forms.ValidationError('We\'re already tracking stories from ' + name + ' on Tumblr.')
