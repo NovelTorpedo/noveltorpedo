@@ -36,6 +36,11 @@ Run scraper:
 scrapy crawl sb_spider
 ```
 
+Alternatively, run the spider manager, which will continuously run the spider.
+```
+python spider_manager.py
+```
+
 
 To see results, update the index of the database. Instructions found [here](../../website)
 
