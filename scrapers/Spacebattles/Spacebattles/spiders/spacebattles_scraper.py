@@ -41,7 +41,10 @@ class StorySpider(scrapy.Spider):
     test_url = None
     custom_settings = {
         "HTTPCACHE_EXPIRATION_SECS": 0,
-        "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+        "HTTPCACHE_STORAGE": 'scrapy.extensions.httpcache.FilesystemCacheStorage',
+        "HTTPCACHE_ENABLED": 1,
+        "HTTPCACHE_DIR": "twopagetest",
+        "HTTPCACHE_IGNORE_MISSING": 1
     }
 
     # this will be a list of tuples (of story objects and urls)
