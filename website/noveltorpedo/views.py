@@ -23,7 +23,6 @@ def submit_story_tumblr(request):
     if request.method == "POST":
         form = TumblrAddForm(request.POST)
         if form.is_valid():
-            form.clean_name()
             form.save()
             return HttpResponse("Stories from submitted successfully.")
     else:
