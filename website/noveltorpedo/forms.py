@@ -4,8 +4,10 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.forms import ModelForm
 from noveltorpedo.models import StoryHost
-from noveltorpedo.fetch_tumblr import get_or_create_storyhost
 import requests
+from sys import path
+path.insert(0, "../")
+from scrapers.tumblr.fetch_tumblr import get_or_create_storyhost
 
 
 class SearchForm(HaystackSearchForm):
