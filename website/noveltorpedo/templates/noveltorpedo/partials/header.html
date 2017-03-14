@@ -19,7 +19,7 @@
                 <ul class="nav navbar-nav navbar-right">
                     {% if not user.is_authenticated %}
                         <li><a href="{% url 'login' %}">Login</a></li>
-                        <li><a href="{% url 'register' %}">Register</a></li>
+                        <li><a href="{% url 'noveltorpedo:register' %}">Register</a></li>
                     {% else %}
                         <li><a href="{% url 'logout' %}?next=%2F">Logout</a></li>
                     {% endif %}
