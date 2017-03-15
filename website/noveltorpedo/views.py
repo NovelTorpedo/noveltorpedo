@@ -25,7 +25,8 @@ def submit_story_tumblr(request):
         form = TumblrAddForm(request.POST)
         if form.is_valid():
             form.save()
-            return HttpResponse("Story submitted successfully.")
+            #return HttpResponse("Story submitted successfully.")
+            return render(request, 'noveltorpedo/submit-tumblr.html', {'form': form, 'success': "Story submitted successfully."})
     else:
         form = TumblrAddForm()
 
