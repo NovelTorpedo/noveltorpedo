@@ -103,3 +103,17 @@ class SearchTests(TestCase):
 
         # Query via segment contents.
         check_response(client.get('/', {'q': 'Righteous justice'}, ['Righteous', 'justice']))
+
+    def test_tumblr_add_form(self):
+        # Check an invalid tumblr name.
+        response = client.post('/submit', {
+            'name': 'a'
+        })
+        self.assertContains(response, 'a is not a valid username on Tumblr')
+
+        # Check a valid tumblr name.
+        response = client.post('/submit', {
+            'name': 'quotethat'
+        })
+        self.assertContains(response, 'Story submitted successfully.')
+        self.assertEqual(StoryHost.objects.filter(url="quotethat.tumblr.com").count(), 1)
