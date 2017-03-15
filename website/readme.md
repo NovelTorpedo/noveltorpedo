@@ -93,6 +93,12 @@ To run the development server:
 python3 manage.py runserver
 ```
 
+For the forgot password feature to work, you'll need to run an SMTP server. 
+To run the debugging mail server provided:
+```bash
+python -m smtpd -n -c DebuggingServer localhost:1025
+```
+
 You can then visit the website at:
 ```bash
 http://127.0.0.1:8000/

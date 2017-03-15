@@ -27,7 +27,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'cs470-litrocket.cs.pdx.edu']
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -138,3 +137,28 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static')
 ]
+
+# required to change default redirect on password reset
+
+LOGIN_URL = '/login'
+
+# Email configurations for outgoing SMTP
+
+if DEBUG:
+    # The settings for the debugging mailserver run with:
+    #    python -m smtpd -n -c DebuggingServer localhost:1025
+    EMAIL_HOST = 'localhost'
+    EMAIL_PORT = 1025
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    EMAIL_USE_TLS = False
+    DEFAULT_FROM_EMAIL = 'testing@example.com'
+else:
+    # Any credentials here would be used in development. Keep these secret!
+    EMAIL_USE_TLS = True
+    EMAIL_HOST = ''
+    EMAIL_PORT = 25
+    EMAIL_HOST_USER = ''
+    EMAIL_HOST_PASSWORD = ''
+    DEFAULT_FROM_EMAIL = ''
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'

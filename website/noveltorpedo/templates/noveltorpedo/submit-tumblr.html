@@ -1,0 +1,23 @@
+{% extends 'noveltorpedo/template.html' %}
+
+{% block title %}Submit{% endblock %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-xs-12">
+            <h1 class="text-center">NovelTorpedo Story Submission</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-xs-12 col-sm-8 col-sm-offset-2">
+            <form method="POST">
+                {% csrf_token %}
+                {% include 'noveltorpedo/partials/form-fields.html' %}
+                {% if success %}
+                    <p>{{ success }}</p>
+                {% endif %}
+                <button type="submit" class="btn btn-default">Submit!</button>
+            </form>
+        </div>
+    </div>
+{% endblock %}
