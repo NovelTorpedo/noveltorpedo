@@ -5,7 +5,6 @@ from django.contrib.auth.models import User
 from django.forms import Form
 from noveltorpedo.models import StoryHost
 import requests
-from sys import path
 from subprocess import call
 
 
@@ -47,5 +46,5 @@ class TumblrAddForm(Form):
         return name
 
     def save(self):
-        path.insert(0, "../scrapers/tumblr")
-        call("python2 fetch_tumblr.py " + self.name)
+        name = self.clean_name()
+        call(["python2", "fetch_tumblr.py", name])
