@@ -45,10 +45,9 @@ def continue_crawl(d, runner, begin_time, hour_limit):
     elapsed_time_seconds = elapsed_time.days * 86400
     elapsed_time_seconds += elapsed_time.seconds
 
-    print("Total time elapsed: {0}".format(elapsed_time_seconds))
     if elapsed_time_seconds < hour_limit:
         wait_time = hour_limit - elapsed_time_seconds
-        print("Waiting for {0} seconds".format(wait_time))
+        # print("Waiting for {0} seconds".format(wait_time))
         time.sleep(wait_time)
 
     d = runner.crawl("sb_spider")
@@ -62,17 +61,23 @@ def run_spiders():
         Initialize a crawler, and start reactor. Loop
         the crawler with the deferred return type.
 
+        Use hour_limit to make sure each repetition of the crawler
+        runs at least an hour after the previous one started.
     :return:
     """
     hour_limit = 3600  # in seconds
 
     settings = get_project_settings()
 
+    # Uncomment the following block of code if you want to test the manager on
+    # the "onepagetest" to make sure the manager is working.
+    """
     settings["HTTPCACHE_ENABLED"] = 1
     settings["HTTPCACHE_EXPIRATION_SECS"] = 0
     settings["HTTPCACHE_STORAGE"] = "scrapy.extensions.httpcache.FilesystemCacheStorage"
     settings["HTTPCACHE_IGNORE_MISSING"] = 1
     settings["HTTPCACHE_DIR"] = "onepagetest"
+    """
 
     runner = CrawlerRunner(settings)
     begin_time = datetime.now()
