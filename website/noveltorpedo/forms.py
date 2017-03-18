@@ -49,12 +49,12 @@ class TumblrAddForm(Form):
 
     def clean_name(self):
         name = self.cleaned_data.get("name")
-        url = 'http://' + name + '.tumblr.com'
+        url = name + '.tumblr.com'
 
         if StoryHost.objects.filter(url=url).count():
             raise forms.ValidationError('We\'re already tracking stories from ' + name + ' on Tumblr.')
 
-        if requests.get(url).status_code != 200:
+        if requests.get('http://' + url).status_code != 200:
             raise forms.ValidationError(name + ' is not a valid username on Tumblr')
 
         return name
