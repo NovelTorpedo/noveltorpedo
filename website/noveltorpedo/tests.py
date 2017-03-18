@@ -18,6 +18,7 @@ from django.test import Client
 from django.utils import timezone
 from noveltorpedo.models import *
 from django.contrib.auth.models import User
+import unittest
 
 client = Client()
 
@@ -118,6 +119,7 @@ class SearchTests(TestCase):
         # Query via segment contents.
         check_response(client.get('/', {'q': 'Righteous justice'}, ['Righteous', 'justice']))
 
+    @unittest.skip("Don't hit Tumblr on every CI run")
     def test_tumblr_add_form(self):
         # Check an invalid tumblr name.
         response = client.post('/submit', {

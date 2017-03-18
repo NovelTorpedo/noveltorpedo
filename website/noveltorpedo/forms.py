@@ -66,7 +66,6 @@ class TumblrAddForm(Form):
         return exit_code == 0
 
     def get_scraper_location(self, file_name):
-
         noveltorpedo_dir = path.abspath(__file__).rsplit("website")[0][:-1]
 
         for root, dirs, files in walk(noveltorpedo_dir):
