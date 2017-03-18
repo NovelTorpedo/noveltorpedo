@@ -264,5 +264,6 @@ if __name__ == "__main__":
         get_or_create_storyhost(sys.argv[1])
     except TumblrNotFound as e:
         logger.error("No such tumblr: " + str(e))
+        sys.exit(1)
     except IndexError:
         update_continuously()
