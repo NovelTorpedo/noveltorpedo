@@ -38,9 +38,12 @@ def submit_story_tumblr(request):
     if request.method == "POST":
         form = TumblrAddForm(request.POST)
         if form.is_valid():
-            form.save()
-            #return HttpResponse("Story submitted successfully.")
-            return render(request, 'noveltorpedo/submit-tumblr.html', {'form': form, 'success': "Story submitted successfully."})
+            if form.save():
+                return render(request, 'noveltorpedo/submit-tumblr.html',
+                              {'form': form, 'message': "Story submitted successfully."})
+            else:
+                return render(request, 'noveltorpedo/submit-tumblr.html',
+                              {'form': form, 'message': "There was an error fetching that story."})
     else:
         form = TumblrAddForm()
 

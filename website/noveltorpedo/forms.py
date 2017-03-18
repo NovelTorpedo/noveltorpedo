@@ -62,7 +62,8 @@ class TumblrAddForm(Form):
     def save(self):
         name = self.clean_name()
         fetch_tumblr = self.get_scraper_location("fetch_tumblr.py")
-        call(["python2", fetch_tumblr, name])
+        exit_code = call(["python2", fetch_tumblr, name])
+        return exit_code == 0
 
     def get_scraper_location(self, file_name):
 
