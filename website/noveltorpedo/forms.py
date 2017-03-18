@@ -61,14 +61,13 @@ class TumblrAddForm(Form):
 
     def save(self):
         name = self.clean_name()
-        fetch_tumblr = get_scraper_location("fetch_tumblr.py")
+        fetch_tumblr = self.get_scraper_location("fetch_tumblr.py")
         call(["python2", fetch_tumblr, name])
 
+    def get_scraper_location(self, file_name):
 
-def get_scraper_location(file_name):
+        noveltorpedo_dir = path.abspath(__file__).rsplit("website")[0][:-1]
 
-    noveltorpedo_dir = path.abspath(__file__).rsplit("website")[0][:-1]
-
-    for root, dirs, files in walk(noveltorpedo_dir):
-        if file_name in files:
-            return path.join(root, file_name)
+        for root, dirs, files in walk(noveltorpedo_dir):
+            if file_name in files:
+                return path.join(root, file_name)
