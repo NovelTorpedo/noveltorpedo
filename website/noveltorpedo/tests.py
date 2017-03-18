@@ -132,4 +132,7 @@ class SearchTests(TestCase):
             'name': 'quotethat'
         })
         self.assertContains(response, 'Story submitted successfully.')
-        self.assertEqual(StoryHost.objects.filter(url="quotethat.tumblr.com").count(), 1)
+
+        # This test will need to be re-thought.  The Django testbed uses an in-memory, temporary database -
+        # while the subprocess call to Finn's tumblr script will insert into the persistent Postgres database.
+        # self.assertEqual(StoryHost.objects.filter(url="quotethat.tumblr.com").count(), 1)
