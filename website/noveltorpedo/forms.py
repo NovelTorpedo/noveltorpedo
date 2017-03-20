@@ -20,7 +20,7 @@ from django.forms import Form
 from noveltorpedo.models import StoryHost
 import requests
 from subprocess import call
-from os import walk, path
+from os import walk, path, chdir, getcwd
 
 class SearchForm(HaystackSearchForm):
     def __init__(self, *args, **kwargs):
@@ -61,8 +61,11 @@ class TumblrAddForm(Form):
 
     def save(self):
         name = self.clean_name()
+        current = getcwd()
         fetch_tumblr = self.get_scraper_location("fetch_tumblr.py")
+        chdir(fetch_tumblr.split("fetch_tumblr")[0])
         exit_code = call(["python2", fetch_tumblr, name])
+        chdir(current)
         return exit_code == 0
 
     def get_scraper_location(self, file_name):
