@@ -4,7 +4,7 @@ cffi==1.9.1
 constantly==15.1.0
 cryptography==1.7.2
 cssselect==1.0.1
-Django==1.10.5
+Django==1.11.29
 django-haystack==2.6.0
 django-widget-tweaks==1.4.1
 elasticsearch==5.1.0
